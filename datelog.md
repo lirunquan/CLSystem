@@ -2,4 +2,6 @@
 
 - create the github repository
 
+- change into `dev` branch
+
 ---
