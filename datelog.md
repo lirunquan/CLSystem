@@ -4,4 +4,8 @@
 
 - change into `dev` branch
 
+- start project server
+
+- update django settings
+
 ---
