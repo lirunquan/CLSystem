@@ -7,7 +7,7 @@ from . import views
 
 urlpatterns = [
     path('index', views.index, name='index'),
-    url(r'index/$', views.index),
     path('login', views.login, name='login'),
     path('logout', views.logout, name='logout'),
+    path('verify_code', views.get_verify_code, name='code'),
 ]
