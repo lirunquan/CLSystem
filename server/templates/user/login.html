@@ -7,19 +7,26 @@
 <body>
 <h1>Login</h1>
 <h3>{{ message }}</h3>
-<form action="/user/login" method="post">
-    账号：<input type="text" name="account" required><br>
-    密码：<input type="password" name="password" required><br>
-    <input type="radio" value="2" name="identity" checked>学生
-    <input type="radio" value="1" name="identity">教师<br>
-    <input type="text" placeholder="输入验证码" name="verify_code" required>
-    <img src="/user/verify_code" id="code_img" alt="验证码" onclick="refresh_code(this)"><br>
-    <input type="submit" value="登录">
+<form id="login_form" action="/user/login" method="post" onsubmit="return encode_pwd()">
+    账号：<input type="text" name="account" required /><br>
+    密码：<input type="password" id="input_pwd" required /><br>
+    <input type="hidden" name="password" id="base64_pwd" value="" />
+    <input type="radio" value="2" name="identity" checked />学生
+    <input type="radio" value="1" name="identity" />教师<br>
+    <input type="text" placeholder="输入验证码" name="verify_code" required />
+    <img src="/user/getVerificationCode" id="code_img" alt="验证码" onclick="refresh_code(this)" /><br>
+    <input type="submit" value="登录" /> &nbsp; <input type="reset" value="重置" />
     {% csrf_token %}
 </form>
 <script>
     function refresh_code(obj) {
         obj.src += "?"+Math.random()
+    }
+    function encode_pwd() {
+        var pwd_input = document.getElementById("input_pwd")
+        var base64_input = document.getElementById("base64_pwd");
+        base64_input.value = btoa(pwd_input.value)
+        return true
     }
 </script>
 </body>

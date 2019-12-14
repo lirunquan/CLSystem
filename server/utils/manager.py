@@ -4,8 +4,41 @@
 import random
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
-from server.settings import UTILS_DIR
+from django.template import loader
+from server.settings import UTILS_DIR, DEFAULT_FROM_EMAIL, SERVER_HOST
+from django.core.mail import send_mail, send_mass_mail
+from apps.record.models import CertificationSentRecord, EmailSentRecord
 import os
+import uuid
+import hashlib
+
+
+class Manager:
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def get_random_char():
+        num = str(random.randint(0, 9))
+        # low_alpha = chr(random.randint(97, 122))
+        up_alpha = chr(random.randint(65, 90))
+        return str(random.choice([num, up_alpha]))
+
+    @staticmethod
+    def get_random_code(length=5):
+        code = ''
+        for i in range(length):
+            code += Manager.get_random_char()
+        return code
+
+    @staticmethod
+    def get_md5_str():
+        uuid_val = uuid.uuid4()
+        uuid_str = str(uuid_val).encode("utf-8")
+        md5 = hashlib.md5()
+        md5.update(uuid_str)
+        return md5.hexdigest()
+
 
 class VerificationCodeGenerator:
     def __init__(self, width=150, height=45, code_length=5, font_size=30, points=20, lines=12, img_format='png'):
@@ -32,9 +65,9 @@ class VerificationCodeGenerator:
     @staticmethod
     def get_random_char():
         num = str(random.randint(0, 9))
-        low_alpha = chr(random.randint(97, 122))
+        # low_alpha = chr(random.randint(97, 122))
         up_alpha = chr(random.randint(65, 90))
-        return random.choice([num, up_alpha])
+        return str(random.choice([num, up_alpha]))
 
     def draw_lines(self):
         for i in range(self.lines):
@@ -55,11 +88,10 @@ class VerificationCodeGenerator:
             self.draw.arc((x, y, x + 4, y + 4), 0, 90, fill=self.get_random_color())
 
     def get_code_image(self):
+        self.code = Manager.get_random_code(length=self.code_length)
         for i in range(self.code_length):
-            randomChar = self.get_random_char()
-            self.code += randomChar
-            self.draw.text((5 + i * self.width/self.code_length, random.randint(0, 5)),
-                           randomChar,
+            self.draw.text((5 + i * self.width / self.code_length, random.randint(0, 5)),
+                           self.code[i],
                            self.get_random_color(),
                            font=self.font)
         self.draw_lines()
@@ -71,11 +103,47 @@ class VerificationCodeGenerator:
         return self.code, self.img_data
 
 
-if __name__ == '__main__':
-    g = VerificationCodeGenerator()
-    code, img_data = g.get_code_image()
-    print(code)
-    f = open('test.png', 'wb')
-    f.write(img_data)
-    f.close()
+class EmailManager(Manager):
+    def __init__(self, account, receive: list):
+        super().__init__()
+        self.account = account
+        self.token = ''
+        self.code = ''
+        self.email_receiver = receive
 
+    def send(self, email_type):
+        if email_type == 'certificate':
+            if not self.send_certificate_email():
+                self.save_sent_record(email_type, False)
+                return
+        self.save_sent_record(email_type)
+
+    def load_html(self, html_file, params):
+        template = loader.get_template(html_file)
+        return template.render(params)
+
+    def send_certificate_email(self):
+        self.token = self.get_md5_str()
+        self.code = self.get_random_code(length=8)
+        url = SERVER_HOST + "/user/active?token={0}&code={1}".format(self.token, self.code)
+        email_content = self.load_html(html_file='/email/certificate.html',
+                                       params={"active_url": url})
+        email_title = "认证邮箱并激活"
+        email_sender = DEFAULT_FROM_EMAIL
+        ret = send_mail(subject=email_title,
+                        from_email=email_sender,
+                        message='',
+                        html_message=email_content,
+                        recipient_list=self.email_receiver)
+        return ret == 1
+
+    def save_sent_record(self, email_type, success=True):
+        if email_type == 'certificate':
+            record = CertificationSentRecord(
+                user=self.account,
+                recipients=';'.join(self.email_receiver),
+                token=self.token,
+                active_code=self.code,
+                success=success
+            )
+            record.save()

@@ -19,18 +19,16 @@ def index(request):
             if user[0].is_login:
                 return render(request, 'user/index.html',
                               {"user": user[0]})
-            else:
-                return redirect('/user/login')
-        else:
-            return HttpResponse(status=500)
-    else:
-        return redirect('/user/login')
+            return redirect('/user/login')
+        return HttpResponse(status=500)
+    return redirect('/user/login')
 
 
 def login(request):
     if request.method == 'GET':
         return render(request, 'user/login.html')
-    elif request.method == 'POST':
+    if request.method == 'POST':
+        print(request.body)
         u_account = request.POST.get('account')
         u_password = request.POST.get('password')
         u_identity = request.POST.get('identity')
@@ -52,14 +50,13 @@ def login(request):
                 request.session['identity'] = user[0].identity
                 request.session['is_login'] = True
                 return redirect('/user/index')
-            else:
-                msg = 'wrong password'
-                return render(request, 'user/login.html', {'message': msg})
-        elif len(user) == 0:
+            msg = 'wrong password'
+            return render(request, 'user/login.html', {'message': msg})
+        if len(user) == 0:
             msg = '\'{}\' does not exist'.format(u_account)
             return render(request, 'user/login.html', {'message': msg})
-    else:
-        return HttpResponse(status=405)
+        return HttpResponse(status=500)
+    return HttpResponse(status=405)
 
 def get_verify_code(request):
     generator = VerificationCodeGenerator()
@@ -71,7 +68,16 @@ def get_verify_code(request):
 def logout(request):
     return redirect('/user/login')
 
+def certificate_email(request):
+    if request.method == 'GET':
+        return render(request, 'user/certificateEmail.html', {})
+    elif request.method == 'POST':
+        return
+    return HttpResponse(status=405)
 
-@require_http_methods(["POST"])
 def change_password(request):
-    pass
+    if request.method == 'GET':
+        return render(request, 'user/changePassword.html', {})
+    if request.method == 'POST':
+        return
+    return HttpResponse(status=405)

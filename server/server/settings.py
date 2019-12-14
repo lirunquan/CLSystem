@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'apps.user',
     'apps.appTest',
+    'apps.record',
     'django_apscheduler',
 ]
 
@@ -131,4 +132,13 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+# Email Settings
+EMAIL_USE_SSL = True
+EMAIL_HOST = 'smtp.163.com'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = '15813388007@163.com'
+EMAIL_HOST_PASSWORD = 'liruner9576'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
+SERVER_HOST = "http://localhost:10086"
