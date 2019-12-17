@@ -8,8 +8,8 @@
 <h1>Login</h1>
 <h3>{{ message }}</h3>
 <form id="login_form" action="/user/login" method="post" onsubmit="return encode_pwd()">
-    账号：<input type="text" name="account" required /><br>
-    密码：<input type="password" id="input_pwd" required /><br>
+    账号：<input type="text" name="account" placeholder="账号为学号/工号 " required /><br>
+    密码：<input type="password" id="input_pwd" placeholder="初始密码为学号/工号后六位" required /><br>
     <input type="hidden" name="password" id="base64_pwd" value="" />
     <input type="radio" value="2" name="identity" checked />学生
     <input type="radio" value="1" name="identity" />教师<br>
@@ -18,14 +18,15 @@
     <input type="submit" value="登录" /> &nbsp; <input type="reset" value="重置" />
     {% csrf_token %}
 </form>
+<a href="/user/forgot">忘记密码</a>
 <script>
     function refresh_code(obj) {
         obj.src += "?"+Math.random()
     }
     function encode_pwd() {
-        var pwd_input = document.getElementById("input_pwd")
+        var pwd_input = document.getElementById("input_pwd");
         var base64_input = document.getElementById("base64_pwd");
-        base64_input.value = btoa(pwd_input.value)
+        base64_input.value = btoa(pwd_input.value);
         return true
     }
 </script>

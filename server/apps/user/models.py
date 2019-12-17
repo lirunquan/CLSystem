@@ -13,7 +13,6 @@ class User(models.Model):
     password = models.CharField(max_length=256, null=False, blank=False)
     email = models.EmailField(default='', blank=True)
     real_name = models.CharField(max_length=50)
-    is_login = models.BooleanField(default=False)
     identity = models.CharField()
 
     class Meta:
