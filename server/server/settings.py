@@ -76,7 +76,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'server.wsgi.application'
 
-
+LOGIN_URL = '/user/login/'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 # Database using MySQL
@@ -142,3 +142,5 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 SERVER_HOST = "http://localhost:10086"
+
+

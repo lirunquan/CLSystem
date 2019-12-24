@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="http://libs.baidu.com/jquery/2.1.1/jquery.min.js"></script>
+    <script src="js/ace/src/ace.js"></script>
+    <script src="js/ace/src/ext-language_tools.js"></script>
+    <script src="js/ace/src/theme-monokai.js"></script>
+    <script src="js/ace/src/mode-c_cpp.js"></script>
+
+    <style type="text/css">
+        .left-part{position:absolute;left:0;top:0;width:40%;height:100%;z-index:1;}
+        .btn-wrap{background:#f3f3f3;text-align:right;position:relative;z-index:1;}
+        .right-part{position:absolute;right:0;top:0;background:#f3f3f3!important;width:60%;height:100%;}
+        #editor {margin: 0;height:100%;width:100%;border-right:1px solid #ddd;}
+    </style>
+</head>
+<body>
+    <div class="left-part">
+        <div class="btn-wrap">
+        <button id="submit">运行</button>
+        </div>
+        <pre id="editor"></pre>
+    </div>
+
+<script>
+    var editor = ace.edit("editor");
+    editor.session.setMode("ace/mode/c_cpp");
+    editor.setFontSize(14);
+    editor.setTheme("ace/theme/monokai");
+    editor.setOptions({
+        enableLiveAutocompletion: true,
+        enableSnippets: true,
+        enableBlockSelect: true,
+        enableBasicAutocompletion: true
+    });
+    var c_code = "";
+    $('#submit').click(function () {
+        c_code = editor.getValue();
+        alert({"code": c_code});
+    });
+</script>
+</body>
+</html>

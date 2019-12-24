@@ -15,4 +15,6 @@ urlpatterns = [
     path('email/verifyCode', views.send_verify_code, name='sendVerifyCOde'),
     path('changePassword', views.change_password, name='changePassword'),
     path('forgot', views.forgot_password, name='forgot'),
+    url(r'^login/$', views.login),
+
 ]

@@ -1,12 +1,13 @@
 from django.shortcuts import render, HttpResponse, redirect
 from django.views.decorators.http import require_http_methods
+from django.contrib.auth.decorators import login_required
 from .models import Teacher, Student
 from utils.manager import VerificationCodeGenerator, EmailManager
 from apps.record.models import *
 import json
 
 # Create your views here.
-
+@login_required()
 def index(request):
     is_login, user = check_is_login(request)
     if is_login == 1:
@@ -63,12 +64,12 @@ def get_verify_code(request):
     return HttpResponse(verify_img)
 
 
-@require_http_methods(["GET"])
+@login_required()
 def logout(request):
     request.session.flush()
     return redirect('/user/login')
 
-
+@login_required()
 def certificate_email(request):
     if request.method == 'GET':
         return render(request, 'user/certificateEmail.html', {})
@@ -104,7 +105,7 @@ def active_email(request):
         return redirect("/user/index")
     return HttpResponse(status=500)
 
-
+@login_required()
 def change_password(request):
     if request.method == 'GET':
         return render(request, 'user/changePassword.html', {})
@@ -122,6 +123,7 @@ def change_password(request):
                 success=True
             )
             user.save()
+            request.session.flush()
             return redirect('/user/login')
         return render(request, 'user/changePassword.html', {"message": "用户密码错误"})
     return HttpResponse(status=405)
