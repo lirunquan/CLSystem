@@ -123,6 +123,7 @@ def change_password(request):
                 success=True
             )
             user.save()
+            record.save()
             request.session.flush()
             return redirect('/user/login')
         return render(request, 'user/changePassword.html', {"message": "用户密码错误"})

@@ -1,0 +1,11 @@
+Watching for file changes with StatReloader
+[28/Dec/2019 20:54:45] "GET /admin/ HTTP/1.1" 200 10206
+[28/Dec/2019 20:54:45] "GET /static/admin/css/dashboard.css HTTP/1.1" 304 0
+[28/Dec/2019 20:54:45] "GET /static/admin/css/responsive.css HTTP/1.1" 304 0
+[28/Dec/2019 20:54:45] "GET /static/admin/css/base.css HTTP/1.1" 304 0
+[28/Dec/2019 20:54:45] "GET /static/admin/css/fonts.css HTTP/1.1" 304 0
+[28/Dec/2019 20:54:45] "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 304 0
+[28/Dec/2019 20:54:45] "GET /static/admin/img/icon-changelink.svg HTTP/1.1" 304 0
+[28/Dec/2019 20:54:45] "GET /static/admin/fonts/Roboto-Bold-webfont.woff HTTP/1.1" 304 0
+[28/Dec/2019 20:54:45] "GET /static/admin/fonts/Roboto-Regular-webfont.woff HTTP/1.1" 304 0
+[28/Dec/2019 20:54:45] "GET /static/admin/fonts/Roboto-Light-webfont.woff HTTP/1.1" 304 0

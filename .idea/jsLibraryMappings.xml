@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="JavaScriptLibraryMappings">
-    <file url="file://$PROJECT_DIR$" libraries="{ace, c_cpp, clike, codemirror, ext-language_tools, ext-old_ie, jquery, mode-c_cpp, python, show-hint, theme-monokai}" />
-  </component>
-</project>
