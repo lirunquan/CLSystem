@@ -19,6 +19,7 @@ def completion_answers():
 class Problem(models.Model):
     title = models.CharField(max_length=256, default='')
     detail = models.TextField(default='')
+    chapter_id = models.IntegerField(default=1)
 
     class Meta:
         abstract = True

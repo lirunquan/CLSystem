@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'apps.appTest',
     'apps.record',
     'apps.oj',
+    'apps.course',
     'django_apscheduler',
 ]
 
