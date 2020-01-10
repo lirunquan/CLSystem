@@ -1,6 +1,8 @@
 from django.db import models
 
 # Create your models here.
+
+
 class Chapter(models.Model):
     id = models.AutoField(primary_key=True)
     title = models.CharField(default='', max_length=256)
@@ -10,6 +12,7 @@ class Chapter(models.Model):
 
     class Meta:
         ordering = ('id',)
+
 
 class Section(models.Model):
     id = models.AutoField(primary_key=True)

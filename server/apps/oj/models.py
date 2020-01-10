@@ -5,16 +5,18 @@ from django_mysql.models import JSONField
 
 def choice_options():
     return {
-    "A": "",
-    "B": "",
-    "C": "",
-    "D": ""
+        "A": "",
+        "B": "",
+        "C": "",
+        "D": ""
     }
+
 
 def completion_answers():
     return {
-    "1": ""
+        "1": ""
     }
+
 
 class Problem(models.Model):
     title = models.CharField(max_length=256, default='')
@@ -36,12 +38,13 @@ class Programme(Problem):
     requirements = JSONField()
     ext = models.TextField(default='')
 
+
 class Choice(Problem):
     multiselect = models.BooleanField(default=False)
     options = JSONField(default=choice_options)
     answer = models.CharField(default='', max_length=10)
 
+
 class Completion(Problem):
     blank_num = models.IntegerField(default=1)
     answers = JSONField(default=completion_answers)
-
