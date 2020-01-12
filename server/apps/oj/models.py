@@ -30,8 +30,8 @@ class Problem(models.Model):
 class Programme(Problem):
     input_demo = models.TextField(default='', blank=True)
     output_demo = models.TextField(default='', blank=True)
-    time_claim = models.IntegerField(default=1000)
-    memory_claim = models.IntegerField(default=256)
+    cpu_time_limit = models.IntegerField(default=1000)
+    memory_limit = models.IntegerField(default=256)
     test_case_in = models.CharField(max_length=256, default='', blank=True)
     test_case_out = models.CharField(max_length=256, default='', blank=True)
     test_case_cpp = models.CharField(max_length=256, default='', blank=True)
