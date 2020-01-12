@@ -1,13 +1,14 @@
 from django.shortcuts import render, HttpResponse, redirect
 from django.views.decorators.http import require_http_methods
-from django.contrib.auth.decorators import login_required
 from .models import Teacher, Student
-from utils.manager import VerificationCodeGenerator, EmailManager
+from utils.VertificationUtil import VertificationCode
+from utils.EmailUtil import EmailUtil
 from apps.record.models import *
 import json
 
 # Create your views here.
-@login_required()
+
+
 def index(request):
     is_login, user = check_is_login(request)
     if is_login == 1:
@@ -58,27 +59,32 @@ def login(request):
 
 
 def get_verify_code(request):
-    generator = VerificationCodeGenerator()
+    generator = VertificationCode()
     verify_code, verify_img = generator.get_code_image()
     request.session['verify_code'] = verify_code
     return HttpResponse(verify_img)
 
 
-@login_required()
 def logout(request):
+    is_login, user = check_is_login(request)
+    if is_login == 0:
+        return redirect("/user/login")
     request.session.flush()
     return redirect('/user/login')
 
-@login_required()
+
 def certificate_email(request):
     if request.method == 'GET':
+        is_login, user = check_is_login(request)
+        if is_login == 0:
+            return redirect("/user/login")
         return render(request, 'user/certificateEmail.html', {})
     elif request.method == 'POST':
         email = request.POST.get('email')
         recipients = [email]
         account = request.session.get('account')
         identity = request.session.get('identity')
-        manager = EmailManager(account, identity, recipients)
+        manager = EmailUtil(account, identity, recipients)
         result = manager.send(email_type='certificate')
         if result == 1:
             msg = "认证邮件已发送"
@@ -105,9 +111,12 @@ def active_email(request):
         return redirect("/user/index")
     return HttpResponse(status=500)
 
-@login_required()
+
 def change_password(request):
     if request.method == 'GET':
+        is_login, user = check_is_login(request)
+        if is_login == 0:
+            return redirect("/user/login")
         return render(request, 'user/changePassword.html', {})
     if request.method == 'POST':
         user = get_user_from_request(request)
@@ -129,6 +138,7 @@ def change_password(request):
         return render(request, 'user/changePassword.html', {"message": "用户密码错误"})
     return HttpResponse(status=405)
 
+
 def forgot_password(request):
     if request.method == 'GET':
         if request.GET.get("account"):
@@ -137,7 +147,7 @@ def forgot_password(request):
             code = request.GET.get("code")
             obj = VerifyCodeSentRecord.objects.filter(account=account, identity=identity, code=code)
             if len(obj) != 0:
-                if code == obj[len(obj)-1].code:
+                if code == obj[len(obj) - 1].code:
                     request.session['account'] = account
                     request.session['identity'] = identity
                     return render(request, 'user/forgotPassword.html', {"step": 2})
@@ -156,13 +166,14 @@ def forgot_password(request):
             new_password=pwd,
             success=True,
             ext="forgot password"
-            )
+        )
         record.save()
         user.password = pwd
         user.save()
         request.session.flush()
         return redirect('/user/login')
     return HttpResponse(status=405)
+
 
 def check_is_login(request):
     if request.session.get("account"):
@@ -194,12 +205,14 @@ def get_user_by_account(account, identity):
         return result[0]
     return None
 
+
 def get_user_from_request(request):
     account = request.session.get("account")
     identity = request.session.get("identity")
     if account and identity:
         return get_user_by_account(account, identity)
     return None
+
 
 def send_verify_code(request):
     account = request.GET.get("account")
@@ -212,7 +225,7 @@ def send_verify_code(request):
         return HttpResponse(json.dumps({"data": "not match"}))
     if "" == user.email:
         return HttpResponse(json.dumps({"data": "no email"}))
-    manager = EmailManager(account=account, identity=identity, receive=[email])
+    manager = EmailUtil(account=account, identity=identity, receive=[email])
     result = manager.send('forgot')
     if 1 != result:
         return HttpResponse(json.dumps({"data": "failed"}))
