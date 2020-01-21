@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'apps.oj',
     'apps.course',
     'django_apscheduler',
+    'django_q',
 ]
 
 MIDDLEWARE = [
@@ -145,4 +146,10 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 SERVER_HOST = "http://localhost:10086"
 
-
+Q_CLUSTER = {
+    'redis': {
+        'host': '127.0.0.1',
+        'port': 6379,
+        'db': 0,
+    }
+}

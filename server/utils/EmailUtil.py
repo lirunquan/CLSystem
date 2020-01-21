@@ -68,6 +68,7 @@ class EmailUtil(Manager):
                 recipients=';'.join(self.email_receiver),
                 token=self.token,
                 active_code=self.code,
+                email_type=email_type,
                 success=success
             )
             record.save()
@@ -77,6 +78,7 @@ class EmailUtil(Manager):
                 identity=self.identity,
                 recipients=';'.join(self.email_receiver),
                 code=self.code,
+                email_type=email_type,
                 success=success
             )
             record.save()
