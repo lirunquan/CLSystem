@@ -5,6 +5,12 @@
 # Judger 
 - source
     https://github.com/dojiong/Lo-runner.git
+- installing 
+    Ubuntu机器下执行
+    ```shell
+    > python3 setup.py build
+    > python3 setup.py install
+    ```
 - testcase detail
     upload a zip file and input the number of testcases
     directory struct demo:
