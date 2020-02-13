@@ -76,7 +76,7 @@ class CommitCodeRecord(CommitRecord):
 
 
 class CommitChoiceRecord(CommitRecord):
-    choice = models.CharField(default='', max_length=20)
+    answers = models.CharField(default='', max_length=20)
 
 
 def completion_answers():
@@ -97,6 +97,6 @@ class CompileSrcRecord(models.Model):
 class JudgeRecord(models.Model):
     time = models.DateTimeField(auto_now=True)
     compile_record = models.OneToOneField(CompileSrcRecord, on_delete=models.CASCADE)
-    testcase_number = models.IntegerField(default=0)
+    testcase_count = models.IntegerField(default=0)
     testcase_path = models.CharField(default='', max_length=256)
     result = models.TextField(default='')
