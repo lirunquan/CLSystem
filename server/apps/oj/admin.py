@@ -4,4 +4,3 @@ from .models import *
 
 admin.site.register(Programme)
 admin.site.register(Choice)
-admin.site.register(Completion)

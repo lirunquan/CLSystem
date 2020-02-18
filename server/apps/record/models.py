@@ -76,15 +76,7 @@ class CommitCodeRecord(CommitRecord):
 
 
 class CommitChoiceRecord(CommitRecord):
-    answers = models.CharField(default='', max_length=20)
-
-
-def completion_answers():
-    return {}
-
-
-class CommitCompletionRecord(CommitRecord):
-    answers = JSONField(default=completion_answers)
+    answer = models.CharField(default='', max_length=20)
 
 
 class CompileSrcRecord(models.Model):
@@ -98,5 +90,5 @@ class JudgeRecord(models.Model):
     time = models.DateTimeField(auto_now=True)
     compile_record = models.OneToOneField(CompileSrcRecord, on_delete=models.CASCADE)
     testcase_count = models.IntegerField(default=0)
-    testcase_path = models.CharField(default='', max_length=256)
+    testcase_dir = models.CharField(default='', max_length=256)
     result = models.TextField(default='')

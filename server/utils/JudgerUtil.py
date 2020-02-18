@@ -2,7 +2,7 @@ import lorun
 import os
 from subprocess import Popen, PIPE
 from apps.record.models import CompileSrcRecord, JudgeRecord
-from apps.oj.models import Programme
+from apps.oj.models import Programme, Choice
 
 
 RESULT_STR = [
@@ -70,6 +70,19 @@ class JudgerUtil:
             exe_path = src_dir + os.path.sep + "main"
             if not self.compile_c_src(src_path, exe_path):
                 return
+            tc_count = self.get_testcase_count()
+            tc_dir = self.get_testcase_dir()
+            rst = []
+            for i in range(tc_count):
+                in_file = os.path.join(tc_dir, '%d.in' % i)
+                out_file = os.path.join(tc_dir, '%d.in' % i)
+                simple_rst = self.run_simple(exe_path, in_file, out_file)
+                simple_rst['result'] = RESULT_STR[simple_rst['result']]
+                rst.append(simple_rst)
+            self.save_judge_record(tc_count, tc_dir, rst)
+            return rst
+        if p_type == "2":
+            pass
 
     def run_simple(self, exe_path, in_path, out_path):
         work_dir = os.path.dirname(exe_path)
@@ -93,6 +106,13 @@ class JudgerUtil:
 
     def get_problem_type(self):
         return self.commit_record_obj.problem_type
+
+    def get_choice(self):
+        p_id = self.commit_record_obj.problem_id
+        choice = Choice.objects.filter(id=p_id)
+        if len(choice) == 1:
+            return choice[0]
+        return None
 
     def get_programme(self):
         p_id = self.commit_record_obj.problem_id
@@ -119,17 +139,17 @@ class JudgerUtil:
             return programme.testcase_count
         return 0
 
-    def get_testcase_path(self):
+    def get_testcase_dir(self):
         programme = self.get_programme()
         if programme:
-            return programme.testcase_path
+            return programme.testcase_dir
         return ""
 
-    def save_judge_record(self, tc_count, tc_path, rst):
+    def save_judge_record(self, tc_count, tc_dir, rst):
         record = JudgeRecord(
             compile_record=self.compile_record_obj,
             testcase_count=tc_count,
-            testcase_path=tc_path,
+            testcase_dir=tc_dir,
             result=rst
         )
         record.save()
