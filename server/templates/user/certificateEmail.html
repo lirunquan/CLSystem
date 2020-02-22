@@ -1,10 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block content %}
 <h3>Certificate Email</h3>
 <p>请输入常用邮箱，将发送认证邮件以认证邮箱</p>
 <form action="/user/email/certificate" method="post">
@@ -13,5 +9,4 @@
     {% csrf_token %}
 </form>
 <h6>{{ message }}</h6>
-</body>
-</html>
+{% endblock %}

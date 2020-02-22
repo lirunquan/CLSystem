@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <label>Add Choice Question</label>
+    <form id="form">    
+        <div id="item" class="form-group panel panel-default">
+            <div class="panel-heading">
+                <label>Question</label>
+            </div>
+            <div class="form-group">
+                <label>title:</label>
+                <input type="text" class="form-control" name="title">
+            </div>
+            <div class="form-group">
+                <label>detail:</label>
+                <textarea class="form-control" rows="5" name="detail"></textarea>
+            </div>
+            <label>options:</label>
+            &nbsp;
+            <button type="button" class="btn btn-info" onclick="add_option()">add an option</button>
+            <button type="button" class="btn btn-danger" onclick="del_option()">delete an option</button>
+            <div  id="opt_panel" name="options" class="panel panel-default form-group">
+                <div id="opt_A" class="form-inline">
+                    <br>
+                    <span>A:</span>
+                    <input type="text" class="form-control" name="A">
+                </div>
+                <div id="opt_B" class="form-inline">
+                    <br>
+                    <span>B:</span>
+                    <input type="text" class="form-control" name="B">
+                </div>
+                <div id="opt_C" class="form-inline">
+                    <br>
+                    <span>C:</span>
+                    <input type="text" class="form-control" name="C">
+                </div>
+                <div id="opt_D" class="form-inline">
+                    <br>
+                    <span>D:</span>
+                    <input type="text" class="form-control" name="D">
+                </div>
+            </div>
+            <div class="form-check">
+                <label class="form-check-label">
+                    <input type="checkbox" class="form-check-input" name="multi">MultiSelect
+                </label>
+            </div>
+            <div class="form-group">
+                <label>reference:</label><br>
+                <input type="text" name="reference" class="form-control">
+            </div>
+        </div>
+        <div>
+            <button type="button" class="btn btn-primary" onclick="summit()">Summit</button>
+        </div>
+    </form>
+<script type="text/javascript">
+    var options_count = 4;
+    function add_option() {
+        options_count ++;
+        var element = "<div id='opt_" + num_check() + "' class='form-inline'>\n "+
+        "<br>\n"+
+        "<span>" + num_check() + ":</span>\n"+
+        "<input type='text' class='form-control' name='"+ num_check() +"'>\n"+
+        "</div>\n";
+        $("#opt_panel").append(element);
+    }
+    function del_option() {
+        if (options_count <= 2) {
+            alert("At least need 2 options");
+            return;
+        }
+        var element = document.getElementById("opt_" + num_check());
+        document.getElementById('opt_panel').removeChild(element);
+        options_count --;
+    }
+    function num_check() {
+        return String.fromCharCode(options_count + 64);
+    }
+    function summit() {
+        var data = [];
+        var json = {};
+        var options = {};
+        json["title"] = $("input[name='title']").val();
+        json["detail"] = $("textarea[name='detail']").val();
+        for (var i = 0; i < options_count; i++) {
+            s = String.fromCharCode(i + 65);
+            options[s] = $("input[name="+s+"]").val();
+        }
+        json["options"] = options;
+        json["multiselect"] = document.getElementsByName('multi')[0].checked;
+        json["reference"] = $("input[name='reference']").val().toUpperCase();
+        data.push(json);
+        console.log(data);
+    }
+</script>
+
+{% endblock %}
