@@ -3,7 +3,7 @@
 {% block content %}
     <label>Add Choice Question</label>
     &nbsp;
-    <button class="bnt btn-link btn-lg" data-toggle="modal" data-target="#uploadModal">add a lot</button>
+    <button class="bnt btn-link btn-lg" data-toggle="modal" data-target="#uploadModal">批量创建</button>
     <form id="form">    
         <div id="item" class="form-group panel panel-default">
             <div class="panel-heading">
@@ -63,15 +63,14 @@
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 </div>
-                <div class="modal-body">
-                    <p>说明+模板下载链接</p>
-                    <label>上传文件：</label>&nbsp;
-                    <input id="file_post" type="file" name="" accept=".xls,.xlsx">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-primary">确认</button>
-                </div>
+                <form class="modal-body" method="post" action="#">
+                    <p>说明</p>
+                    <p><a href="#">模板下载</a></p>
+                    <label>上传文件：</label>
+                    <input class="form-control" id="file_post" type="file" name="" accept=".xls,.xlsx">
+                    <br>
+                    <button type="submit" class="btn btn-primary">上传</button>
+                </form>
             </div>
         </div>
     </div>
