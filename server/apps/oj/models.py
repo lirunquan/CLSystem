@@ -44,6 +44,6 @@ class Programme(Problem):
 
 class Choice(Problem):
     problem_type = models.CharField(choices=PROBLEM_TYPE, default='2', max_length=2, editable=False)
-    multiselect = models.BooleanField(default=False)
+    multichoice = models.BooleanField(default=False)
     options = JSONField(default=choice_options)
     reference = models.CharField(default='', max_length=10)

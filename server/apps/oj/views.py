@@ -4,7 +4,7 @@ from .models import Programme, Choice
 # Create your views here.
 
 
-def add_problem(request):
+def problems_list(request):
     pass
 
 
