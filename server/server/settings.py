@@ -17,6 +17,7 @@ import sys
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 UTILS_DIR = os.path.join(BASE_DIR, 'utils')
+RESOUCES_DIR = os.path.join(BASE_DIR, 'resources')
 sys.path.insert(0, UTILS_DIR)
 
 # Quick-start development settings - unsuitable for production
