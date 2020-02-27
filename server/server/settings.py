@@ -17,7 +17,7 @@ import sys
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 UTILS_DIR = os.path.join(BASE_DIR, 'utils')
-RESOUCES_DIR = os.path.join(BASE_DIR, 'resources')
+RESOURCES_DIR = os.path.join(BASE_DIR, 'resources')
 sys.path.insert(0, UTILS_DIR)
 
 # Quick-start development settings - unsuitable for production
@@ -29,7 +29,7 @@ SECRET_KEY = 'b(mwk=yko4k43&u4@o)hhjq6$b=52#8#p+*4kwmx2*$oeitc%u'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -148,6 +148,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 SERVER_HOST = "http://localhost:10086"
 
 Q_CLUSTER = {
+    'workers': 4,
+    'queue_limit': 20,
     'redis': {
         'host': '127.0.0.1',
         'port': 6379,

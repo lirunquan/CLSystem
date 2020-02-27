@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdn.staticfile.org/jquery/3.4.0/jquery.min.js"></script>
+<script src="https://cdn.staticfile.org/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
 <script src="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+{% block js %}
+{% endblock %}
 <head>
     <title>{% block title %} C语言学习系统 {% endblock %}</title>
     <meta charset="utf-8">
@@ -10,10 +13,14 @@
 <body>
 
 {% include "nav.html" %}
+<div class="row">
+   <div class="col-md-10 col-md-offset-1">
+       {% block content %}
 
-{% block content %}
+        {% endblock %}
+   </div> 
+</div>
 
-{% endblock %}
 
 {% include "bottom.html" %}
 

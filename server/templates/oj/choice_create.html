@@ -1,60 +1,61 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <label>Add Choice Question</label>
+    <label>创建选择题</label>
     &nbsp;
-    <button class="bnt btn-link btn-lg" data-toggle="modal" data-target="#uploadModal">批量创建</button>
-    <form id="form">    
+    <button class="bnt btn-link" data-toggle="modal" data-target="#uploadModal">批量导入</button>
+    <form id="form"> 
+        {% csrf_token %}   
         <div id="item" class="form-group panel panel-default">
-            <div class="panel-heading">
-                <label>Question</label>
-            </div>
-            <div class="form-group">
-                <label>title:</label>
-                <input type="text" class="form-control" name="title">
-            </div>
-            <div class="form-group">
-                <label>detail:</label>
-                <textarea class="form-control" rows="5" name="detail"></textarea>
-            </div>
-            <label>options:</label>
-            &nbsp;
-            <button type="button" class="btn btn-info" onclick="add_option()">add an option</button>
-            <button type="button" class="btn btn-danger" onclick="del_option()">delete an option</button>
-            <div  id="opt_panel" name="options" class="panel panel-default form-group">
-                <div id="opt_A" class="form-inline">
-                    <br>
-                    <span>A:</span>
-                    <input type="text" class="form-control" name="A">
+            <div class="panel-body">
+                <div class="form-group">
+                    <label>标题:</label>
+                    <input type="text" class="form-control" name="title">
                 </div>
-                <div id="opt_B" class="form-inline">
-                    <br>
-                    <span>B:</span>
-                    <input type="text" class="form-control" name="B">
+                <div class="form-group">
+                    <label>内容:</label>
+                    <textarea class="form-control" rows="5" name="detail"></textarea>
                 </div>
-                <div id="opt_C" class="form-inline">
-                    <br>
-                    <span>C:</span>
-                    <input type="text" class="form-control" name="C">
+                <label>选项:</label>
+                &nbsp;
+                <button type="button" class="btn btn-info" onclick="add_option()">添加选项</button>
+                <button type="button" class="btn btn-danger" onclick="del_option()">删除选项</button>
+                <div name="options" class="panel panel-default form-group">
+                    <div id="opt_panel" class="panel-body">
+                        <div id="opt_A" class="form-inline">
+                            <span>A:</span>
+                            <input type="text" class="form-control" name="A">
+                        </div>
+                        <div id="opt_B" class="form-inline">
+                            <br>
+                            <span>B:</span>
+                            <input type="text" class="form-control" name="B">
+                        </div>
+                        <div id="opt_C" class="form-inline">
+                            <br>
+                            <span>C:</span>
+                            <input type="text" class="form-control" name="C">
+                        </div>
+                        <div id="opt_D" class="form-inline">
+                            <br>
+                            <span>D:</span>
+                            <input type="text" class="form-control" name="D">
+                        </div>
+                    </div>
                 </div>
-                <div id="opt_D" class="form-inline">
-                    <br>
-                    <span>D:</span>
-                    <input type="text" class="form-control" name="D">
+                <div class="form-check">
+                    <label class="form-check-label">
+                        <input type="checkbox" class="form-check-input" name="multi">  多选
+                    </label>
                 </div>
-            </div>
-            <div class="form-check">
-                <label class="form-check-label">
-                    <input type="checkbox" class="form-check-input" name="multi">MultiChoice
-                </label>
-            </div>
-            <div class="form-group">
-                <label>reference:</label><br>
-                <input type="text" name="reference" class="form-control">
+                <div class="form-group">
+                    <label>参考答案:</label><br>
+                    <input type="text" name="reference" class="form-control">
+                </div>
             </div>
         </div>
         <div>
-            <button type="button" class="btn btn-primary" onclick="summit()">Summit</button>
+            <button type="button" class="btn btn-primary" onclick="summit()">提交</button>
         </div>
     </form>
     <div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-hidden="true">
@@ -63,11 +64,12 @@
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 </div>
-                <form class="modal-body" method="post" action="#">
-                    <p>说明</p>
-                    <p><a href="#">模板下载</a></p>
+                <form class="modal-body" method="post" action="/oj/choice/create/batch" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <p>说明：请下载模板并按照模板填写需要创建的选择题</p>
+                    <p><a href="/oj/choice/template_download">模板下载</a></p>
                     <label>上传文件：</label>
-                    <input class="form-control" id="file_post" type="file" name="" accept=".xls,.xlsx">
+                    <input class="form-control" id="file_post" type="file" name="excel" accept=".xls,.xlsx">
                     <br>
                     <button type="submit" class="btn btn-primary">上传</button>
                 </form>
@@ -77,6 +79,10 @@
 <script type="text/javascript">
     var options_count = 4;
     function add_option() {
+        if (options_count >= 6) {
+            alert("At most 6 options");
+            return ;
+        }
         options_count ++;
         var element = "<div id='opt_" + num_check() + "' class='form-inline'>\n "+
         "<br>\n"+
@@ -98,6 +104,7 @@
         return String.fromCharCode(options_count + 64);
     }
     function summit() {
+        var token = $.cookie('csrftoken');
         var json = {};
         var options = {};
         json["title"] = $("input[name='title']").val();
@@ -109,7 +116,17 @@
         json["options"] = options;
         json["multichoice"] = document.getElementsByName('multi')[0].checked;
         json["reference"] = $("input[name='reference']").val().toUpperCase();
-        // post send json
+        $.ajax({
+            type: "POST",
+            url: "/oj/choice/create/single",
+            headers:{'X-CSRFToken': token},
+            contentType: "application/json",
+            dataType: "json",
+            data: JSON.stringify(json),
+            success: function(data){
+
+            }
+        });
     }
 </script>
 
