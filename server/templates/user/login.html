@@ -1,20 +1,51 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Login</h1>
-<h3>{{ message }}</h3>
-<form id="login_form" action="/user/login" method="post" onsubmit="return encode_pwd()">
-    账号：<input type="text" name="account" placeholder="账号为学号/工号 " required /><br>
-    密码：<input type="password" id="input_pwd" placeholder="初始密码为学号/工号后六位" required /><br>
-    <input type="hidden" name="password" id="base64_pwd" value="" />
-    <input type="radio" value="2" name="identity" checked />学生
-    <input type="radio" value="1" name="identity" />教师<br>
-    <input type="text" placeholder="输入验证码" name="verify_code" required />
-    <img src="/user/getVerificationCode" id="code_img" alt="验证码" onclick="refresh_code(this)" /><br>
-    <input type="submit" value="登录" /> &nbsp; <input type="reset" value="重置" />
+
+<form id="login_form" class="col-md-6" action="/user/login" method="post" onsubmit="return encode_pwd()">
     {% csrf_token %}
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <label>登录</label>
+        </div>
+        <div class="panel-body form-group">
+            <div class="form-inline">
+                <label>帐号:</label>
+                <input type="text" name="account" class="form-control" placeholder="账号为学号/工号 " required />
+            </div>
+            <br>
+            <div class="form-inline">
+                <label>密码:</label>
+                <input type="password" id="input_pwd" class="form-control" placeholder="初始密码为学号/工号后六位" required />
+                <input type="hidden" name="password" id="base64_pwd" value="" />
+                &nbsp;
+                <a href="/user/forgot">忘记密码</a>
+            </div>
+            <br>
+            <div class="form-inline">
+                <label class="radio-inline">
+                    <input type="radio" value="2" name="identity" checked />学生
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" value="1" name="identity" />教师
+                </label>
+            </div>
+            <br>
+            <div class="form-inline">
+                <input type="text" class="form-control" placeholder="输入验证码" name="verify_code" required />
+                <img src="/user/getVerificationCode" id="code_img" alt="验证码" onclick="refresh_code(this)" />
+            </div>
+            <br>
+            <div class="form-inline">
+                <button type="summit" class="btn btn-primary">登录</button>
+                &nbsp;
+                <button type="reset" class="btn btn-link">重置</button>
+            </div>
+        </div>
+    </div>
 </form>
-<a href="/user/forgot">忘记密码</a>
+<h3 class="text-warning">{{ message }}</h3>
+
 <script>
     function refresh_code(obj) {
         obj.src += "?"+Math.random()

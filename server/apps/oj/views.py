@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect, HttpResponse
 from django.http import FileResponse
 from django.views.decorators.http import require_http_methods
+from django_q.tasks import async_task
 from .models import Programme, Choice
 from apps.user.views import check_is_login
-from utils.FileUtil import handle_batch_choice_excel
 from server.settings import RESOURCES_DIR
 import json
 import os
@@ -34,7 +34,10 @@ def problems_list(request):
 
 
 def add_programme(request):
-    pass
+    if request.method == 'GET':
+        return render(request, 'oj/programme_create.html')
+    if request.method == 'POST':
+        return HttpResponse(status=200)
 
 
 def add_choice(request):
@@ -44,14 +47,13 @@ def add_choice(request):
 @require_http_methods(['POST'])
 def add_choice_single(request):
     data_dic = json.loads(request.body)
-    choice = Choice(
-        title=data_dic["title"],
-        detail=data_dic["detail"],
-        options=data_dic["options"],
-        multichoice=data_dic["multichoice"],
-        reference=data_dic["reference"]
-    )
-    choice.save()
+    async_task('tasks.add_choice',
+               data_dic["title"],
+               data_dic["detail"],
+               data_dic["options"],
+               data_dic["multichoice"],
+               data_dic["reference"]
+               )
     return HttpResponse(status=200)
 
 
@@ -60,26 +62,10 @@ def add_choice_batch(request):
     execel_file = request.FILES.get("excel")
     filename = "upload_" + str(time.time()).replace('.', '') + '.xls'
     saved_path = os.path.join(RESOURCES_DIR, 'choices', filename)
-    with open(saved_path, 'wb') as f:
-        for i in execel_file.chunks():
-            f.write(i)
-    data_list = handle_batch_choice_excel(saved_path)
-    print(data_list)
-    for c in data_list:
-        options = {
-            "A": c["A"],
-            "B": c["B"],
-            "C": c["C"],
-            "D": c["D"]
-        }
-        choice = Choice(
-            title=c["title"],
-            detail=c["detail"],
-            options=options,
-            multichoice=c["multichoice"] == 'Y',
-            reference=c["reference"]
-        )
-        choice.save()
+    async_task('tasks.import_choice_from_excel',
+               execel_file,
+               saved_path
+               )
     return redirect("/oj/problems_list")
 
 

@@ -11,4 +11,5 @@ urlpatterns = [
     path('choice/create/single', views.add_choice_single, name='create_choice_single'),
     path('choice/create/batch', views.add_choice_batch, name='create_choice_batch'),
     path('choice/template_download', views.download_template, name='download'),
+    path('programme/create', views.add_programme, name='create_programme'),
 ]
