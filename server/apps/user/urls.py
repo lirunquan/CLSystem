@@ -16,5 +16,8 @@ urlpatterns = [
     path('changePassword', views.change_password, name='changePassword'),
     path('forgot', views.forgot_password, name='forgot'),
     url(r'^login/$', views.login),
-
+    path('import', views.import_user, name='importPage'),
+    path('import/<int:identity>', views.import_user_save, name='saveUser'),
+    path('template/student', views.download_student, name='stuTemp'),
+    path('template/teacher', views.download_teacher, name='tecTemp'),
 ]

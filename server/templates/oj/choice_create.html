@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+{% if request.session.identity == '1' %}
     <label>创建选择题</label>
     &nbsp;
     <button class="bnt btn-link" data-toggle="modal" data-target="#uploadModal">批量导入</button>
@@ -129,5 +130,18 @@
         });
     }
 </script>
-
+{% elif request.session.identity == '2' %}
+<div class="alert alert-warning">
+    <p>
+        <strong>警告:</strong>
+        你未获取操作本页面的权限
+    </p>
+    <a href="javascript:history.go(-1)">返回</a>
+</div>
+{% else %}
+<div class="alert alert-warning">
+    <label>请先</label>
+    <a href="/user/login">登录</a>
+</div>
+{% endif %}
 {% endblock %}

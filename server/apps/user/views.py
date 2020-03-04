@@ -1,11 +1,16 @@
 from django.shortcuts import render, HttpResponse, redirect
 from django.views.decorators.http import require_http_methods
+from django.http import FileResponse
 from .models import Teacher, Student
 from utils.VertificationUtil import VertificationCode
 from utils.EmailUtil import EmailUtil
+from utils.FileUtil import handle_user_excel, write_file
+from server.settings import RESOURCES_DIR
 from apps.record.models import *
 import json
-
+import os
+import time
+import base64
 # Create your views here.
 
 
@@ -230,3 +235,65 @@ def send_verify_code(request):
     if 1 != result:
         return HttpResponse(json.dumps({"data": "failed"}))
     return HttpResponse(json.dumps({"data": "sent"}))
+
+
+@require_http_methods(['GET'])
+def import_user(request):
+    return render(request, "user/import_user.html")
+
+
+def import_user_save(request, identity):
+    if request.method == 'POST':
+        if identity == 1:
+            tec_file = request.FILES.get("teacher_excel")
+            filename = 'teachers_' + str(time.time()).replace('.', '') + '.xls'
+            saved_path = os.path.join(RESOURCES_DIR, 'user', filename)
+            write_file(tec_file, saved_path)
+            tec_data = handle_user_excel(saved_path)
+            for t in tec_data:
+                account = str(t["account"])
+                pwd = account[len(account) - 6: len(account)]
+                teacher = Teacher(
+                    account=account,
+                    real_name=t["name"],
+                    email="",
+                    password=base64.b64encode(pwd.encode('utf-8')).decode("utf-8")
+                )
+                teacher.save()
+        if identity == 2:
+            stu_file = request.FILES.get("student_excel")
+            filename = 'students_' + str(time.time()).replace('.', '') + '.xls'
+            saved_path = os.path.join(RESOURCES_DIR, 'user', filename)
+            write_file(stu_file, saved_path)
+            stu_data = handle_user_excel(saved_path)
+            for s in stu_data:
+                account = str(s["account"])
+                pwd = account[len(account) - 6: len(account)]
+                student = Student(
+                    account=account,
+                    real_name=s["name"],
+                    email="",
+                    password=base64.b64encode(pwd.encode('utf-8')).decode("utf-8")
+                )
+                student.save()
+        request.session['msg'] = "import successfully."
+        return redirect("/user/import")
+
+
+@require_http_methods(['GET'])
+def download_student(request):
+    return temp_download('student.xls')
+
+
+@require_http_methods(['GET'])
+def download_teacher(request):
+    return temp_download('teacher.xls')
+
+
+def temp_download(filename):
+    temp_path = os.path.join(RESOURCES_DIR, 'user', filename)
+    f = open(temp_path, 'rb')
+    response = FileResponse(f)
+    response["Content-Type"] = 'application/octet-stream'
+    response['Content-Disposition'] = 'attachment;filename="' + filename + '"'
+    return response

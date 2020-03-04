@@ -9,3 +9,6 @@ Watching for file changes with StatReloader
 [28/Dec/2019 20:54:45] "GET /static/admin/fonts/Roboto-Bold-webfont.woff HTTP/1.1" 304 0
 [28/Dec/2019 20:54:45] "GET /static/admin/fonts/Roboto-Regular-webfont.woff HTTP/1.1" 304 0
 [28/Dec/2019 20:54:45] "GET /static/admin/fonts/Roboto-Light-webfont.woff HTTP/1.1" 304 0
+Watching for file changes with StatReloader
+[01/Mar/2020 21:33:23] "GET /admin/oj/choice/ HTTP/1.1" 200 4778
+[01/Mar/2020 21:33:23] "GET /admin/jsi18n/ HTTP/1.1" 200 3223

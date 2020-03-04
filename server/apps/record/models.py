@@ -50,19 +50,10 @@ class VerifyCodeSentRecord(EmailSentRecord):
     code = models.CharField(max_length=20, default='')
 
 
-COMMIT_STATUS = (
-    ("-1", "Error"),
-    ("1", "Accepted"),
-    ("2", "Compiling"),
-    ("3", "Wait For Judge"),
-)
-
-
 class CommitRecord(Record):
     operation = models.CharField(default='commit', max_length=20, editable=False)
     problem_id = models.IntegerField(default=0)
     problem_type = models.CharField(choices=PROBLEM_TYPE, default='0', max_length=2)
-    status = models.CharField(choices=COMMIT_STATUS, max_length=10)
     commit_times = models.IntegerField(default=0)
     ext = models.TextField(default='')
 
@@ -71,11 +62,14 @@ class CommitRecord(Record):
 
 
 class CommitCodeRecord(CommitRecord):
+    problem_type = models.CharField(choices=PROBLEM_TYPE, default='1', max_length=2)
     src_content = models.TextField(default='')
     src_saved_path = models.CharField(max_length=256)
 
 
 class CommitChoiceRecord(CommitRecord):
+    problem_type = models.CharField(choices=PROBLEM_TYPE, default='2', max_length=2)
+    correct = models.BooleanField(default=False)
     answer = models.CharField(default='', max_length=20)
 
 
@@ -86,9 +80,11 @@ class CompileSrcRecord(models.Model):
     result = models.TextField(default='')
 
 
+def judge_result():
+    return []
+
+
 class JudgeRecord(models.Model):
     time = models.DateTimeField(auto_now=True)
     compile_record = models.OneToOneField(CompileSrcRecord, on_delete=models.CASCADE)
-    testcase_count = models.IntegerField(default=0)
-    testcase_dir = models.CharField(default='', max_length=256)
-    result = models.TextField(default='')
+    result = JSONField(default=judge_result)

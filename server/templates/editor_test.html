@@ -4,16 +4,16 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <script src="http://libs.baidu.com/jquery/2.1.1/jquery.min.js"></script>
-    <script src="js/ace/src/ace.js"></script>
-    <script src="js/ace/src/ext-language_tools.js"></script>
-    <script src="js/ace/src/theme-monokai.js"></script>
-    <script src="js/ace/src/mode-c_cpp.js"></script>
-    <script src="js/ace/src/mode-markdown.js"></script>
+    <script src="static/js/ace/src/ace.js"></script>
+    <script src="static/js/ace/src/ext-language_tools.js"></script>
+    <script src="static/js/ace/src/theme-monokai.js"></script>
+    <script src="static/js/ace/src/mode-c_cpp.js"></script>
+    <script src="static/js/ace/src/mode-markdown.js"></script>
 
     <style type="text/css">
-        .left-part{position:absolute;left:0;top:0;width:40%;height:100%;z-index:1;}
+        .left-part{position:absolute;left:0;top:0;width:48%;height:100%;z-index:1;overflow-y: auto}
         .btn-wrap{background:#f3f3f3;text-align:right;position:relative;z-index:1;}
-        .right-part{position:absolute;right:0;top:0;width:40%;height:100%;z-index:1;}
+        .right-part{position:absolute;right:0;top:0;width:48%;height:100%;z-index:1;}
         #editor {margin: 0;height:100%;width:100%;border-right:1px solid #ddd;}
         #m_editor {margin: 0;height:100%;width:100%;border-right:1px solid #ddd;}
     </style>
@@ -23,7 +23,7 @@
         <div class="btn-wrap">
         <button id="submit">运行</button>
         </div>
-        <pre id="editor"></pre>
+        <div id="editor"></div>
     </div>
     <div class="right-part">
         <pre id="m_editor"></pre>

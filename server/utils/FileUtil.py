@@ -9,16 +9,35 @@ def df_to_json(df):
     return json.loads(df.to_json(orient="records", force_ascii=False))
 
 
-def handle_choice_excel(excel_path):
+def handle_excel(excel_path, cols):
     dataframe = pd.read_excel(excel_path, sheet_name=0)
-    dataframe.columns = ["title", "detail", "A", "B", "C", "D", "multichoice", "reference"]
+    dataframe.columns = cols
     return df_to_json(dataframe)
+
+
+def handle_choice_excel(excel_path):
+    data = handle_excel(excel_path,
+                        ["title", "detail", "A", "B", "C", "D", "multichoice", "reference"]
+                        )
+    return data
+
+
+def handle_user_excel(excel_path):
+    data = handle_excel(excel_path,
+                        ["account", "name"]
+                        )
+    return data
 
 
 def write_file(data, path):
     with open(path, 'wb') as f:
         for i in data.chunks():
             f.write(i)
+
+
+def write_str_file(string, path):
+    with open(path, 'w') as f:
+        f.write(string)
 
 
 def unzip_file(zip_file, unzip_dir):

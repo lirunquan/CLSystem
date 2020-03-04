@@ -1,14 +1,20 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<script src="https://cdn.staticfile.org/jquery/3.4.0/jquery.min.js"></script>
-<script src="https://cdn.staticfile.org/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
-<script src="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
-<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
-{% block js %}
-{% endblock %}
+
 <head>
     <title>{% block title %} C语言学习系统 {% endblock %}</title>
     <meta charset="utf-8">
+    <script src="https://cdn.staticfile.org/jquery/3.4.0/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script src="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    {% block js %}
+    {% endblock %}
+    {% block style %}
+    <style type="text/css">
+      body {margin: 55px 0px;}
+    </style>
+    {% endblock %}
 </head>
 <body>
 
@@ -19,6 +25,10 @@
 
         {% endblock %}
    </div> 
+</div>
+<div class="row">
+  {% block special %}
+  {% endblock %}
 </div>
 
 

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block js %}
+    <script type="text/javascript" src="{% static 'js/ace/src/ace.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/ace/src/ext-language_tools.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/ace/src/theme-monokai.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/ace/src/mode-c_cpp.js' %}"></script>
+    <script src="https://cdn.bootcss.com/holder/2.9.6/holder.min.js"></script>
+{% endblock %}
+{% block style %}
+<style type="text/css">
+    #question {position:absolute;left:1px;top:52px;bottom: 52px; width:49%;z-index:1;overflow-y: auto}
+    #answer {position:absolute;right:1px;top:52px;bottom: 52px;width:49%;z-index:1;overflow-y: auto}
+    #editor {margin: 0;height:90%;width:100%;border-right:1px solid #ddd;}
+</style>
+{% endblock %}
+{% block special %}
+    <div id="question">
+        <div id="prog" class="panel panel-default">
+            <div class="panel-body">
+                <h3>
+                    {{ programme.title }}<br>
+                </h3>
+                <p>运行时间<={{ programme.time_limit }}ms;内存占用<={{ programme.memory_limit }}KB</p>
+                <p class="lead">{{ programme.detail }}</p>
+                <label>输入描述:</label>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                    <p>{{ programme.input_desc }}</p>
+                    </div>
+                </div>
+                <label>输出描述:</label>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                    <p>{{ programme.output_desc }}</p>
+                    </div>
+                </div>
+                {% if programme.input_demo != '' %}
+                <label>输入示例:</label>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <p>{{ programme.input_demo }}</p>
+                    </div>
+                </div>
+                {% endif %}
+                {% if programme.output_demo != '' %}
+                <label>输出示例:</label>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <p>{{ programme.output_demo }}</p>
+                    </div>
+                </div>
+                {% endif %}
+                {% if request.session.identity == '1' %}
+
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% if request.session.identity != '1' %}
+    <div id="answer">
+        <pre id="editor"></pre>
+        <div class="form-inline">
+            {% if not request.session.identity %}
+            <button class="btn btn-disabled" disabled="disabled">提交</button>
+            {% else %}
+            <button class="btn btn-primary">提交</button>
+            {% endif %}
+            <button class="btn btn-danger" onclick="reset_esitor()">重置</button>
+        </div>
+    </div>
+<script type="text/javascript">
+    var editor = ace.edit("editor");
+    editor.session.setMode("ace/mode/c_cpp");
+    editor.setFontSize(18);
+    editor.setTheme("ace/theme/monokai");
+    editor.setOptions({
+        enableLiveAutocompletion: true,
+        enableSnippets: true,
+        enableBlockSelect: true,
+        enableBasicAutocompletion: true
+    });
+    function reset_esitor() {
+        editor.setValue("");
+    }
+</script>
+{% endif %}
+{% endblock %}

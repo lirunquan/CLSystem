@@ -1,4 +1,7 @@
-<nav>
+<nav class="navbar navbar-default navbar-fixed-top">
+    {% if request.session.account %}
+    <a href="/user/index">{{request.session.account}}</a>
+    {% else %}
     <a href="/user/login">登录</a>
+    {% endif %}
 </nav>
-<hr>

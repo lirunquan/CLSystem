@@ -22,7 +22,6 @@ def choice_options():
 class Problem(models.Model):
     title = models.CharField(max_length=256, default='')
     detail = models.TextField(default='')
-    chapter_id = models.IntegerField(default=1)
 
     class Meta:
         abstract = True
@@ -38,8 +37,6 @@ class Programme(Problem):
     memory_limit = models.IntegerField(default=20000)  # KB
     testcase_count = models.IntegerField(default=0)
     testcase_dir = models.CharField(default='', max_length=256)
-    requirements = JSONField()
-    ext = models.TextField(default='')
 
 
 class Choice(Problem):

@@ -58,8 +58,6 @@ class JudgerUtil:
             exe_path=exe_path,
             result=result)
         record.save()
-        self.commit_record_obj.status = "3"
-        self.commit_record_obj.save()
         self.compile_record_obj = record
 
     def judge(self):
@@ -69,20 +67,20 @@ class JudgerUtil:
             src_dir = os.path.dirname(src_path)
             exe_path = src_dir + os.path.sep + "main"
             if not self.compile_c_src(src_path, exe_path):
+                rst = {}
+                rst['result'] = RESULT_STR[7]
+                self.save_judge_record(rst)
                 return
             tc_count = self.get_testcase_count()
             tc_dir = self.get_testcase_dir()
             rst = []
             for i in range(tc_count):
                 in_file = os.path.join(tc_dir, '%d.in' % i)
-                out_file = os.path.join(tc_dir, '%d.in' % i)
+                out_file = os.path.join(tc_dir, '%d.out' % i)
                 simple_rst = self.run_simple(exe_path, in_file, out_file)
                 simple_rst['result'] = RESULT_STR[simple_rst['result']]
                 rst.append(simple_rst)
-            self.save_judge_record(tc_count, tc_dir, rst)
-            return rst
-        if p_type == "2":
-            pass
+            self.save_judge_record(rst)
 
     def run_simple(self, exe_path, in_path, out_path):
         work_dir = os.path.dirname(exe_path)
@@ -145,11 +143,17 @@ class JudgerUtil:
             return programme.testcase_dir
         return ""
 
-    def save_judge_record(self, tc_count, tc_dir, rst):
+    def get_choice_answer(self):
+        return self.commit_record_obj.answer
+
+    def get_reference(self):
+        choice = self.get_choice()
+        if choice:
+            return choice.reference
+
+    def save_judge_record(self, rst):
         record = JudgeRecord(
             compile_record=self.compile_record_obj,
-            testcase_count=tc_count,
-            testcase_dir=tc_dir,
             result=rst
         )
         record.save()
