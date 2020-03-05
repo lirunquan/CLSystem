@@ -83,7 +83,3 @@ def programme_commit(account, p_id, code):
     record.save()
     judger = JudgerUtil(record)
     judger.judge()
-
-
-def choice_commit(account, c_id, answer):
-    pass

@@ -46,12 +46,11 @@ def unzip_file(zip_file, unzip_dir):
 
 
 def make_dir(dir_name):
-    if os.path.isdir(dir_name):
-        if os.path.exists(dir_name):
-            shutil.rmtree(dir_name)
-            os.mkdir(dir_name)
-        else:
-            os.mkdir(dir_name)
+    if os.path.exists(dir_name):
+        shutil.rmtree(dir_name)
+        os.mkdir(dir_name)
+    else:
+        os.mkdir(dir_name)
 
 
 def remove_file(filename):

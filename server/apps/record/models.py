@@ -77,7 +77,8 @@ class CompileSrcRecord(models.Model):
     time = models.DateTimeField(auto_now=True)
     commit_record = models.OneToOneField(CommitCodeRecord, on_delete=models.CASCADE)
     exe_path = models.CharField(default='', max_length=256)
-    result = models.TextField(default='')
+    ext = models.TextField(default='')
+    success = models.BooleanField(default=False)
 
 
 def judge_result():

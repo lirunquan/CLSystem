@@ -1,4 +1,4 @@
-import lorun
+import _judger
 import os
 from subprocess import Popen, PIPE
 from apps.record.models import CompileSrcRecord, JudgeRecord
@@ -6,16 +6,22 @@ from apps.oj.models import Programme, Choice
 
 
 RESULT_STR = [
-    'Accepted',
-    'Presentation Error',
-    'Time Limit Exceeded',
-    'Memory Limit Exceeded',
-    'Wrong Answer',
-    'Runtime Error',
-    'Output Limit Exceeded',
-    'Compile Error',
-    'System Error'
+    "ACCEPT",
+    "CPU_TIME_LIMIT_EXCEEDED",
+    "REAL_TIME_LIMIT_EXCEEDED",
+    "MEMORY_LIMIT_EXCEEDED",
+    "RUNTIME_ERROR",
+    "SYSTEM_ERROR",
+    "WRONG_ANSWER"
 ]
+# _judger
+# RESULT_SUCCESS = 0
+# RESULT_CPU_TIME_LIMIT_EXCEEDED = 1
+# RESULT_REAL_TIME_LIMIT_EXCEEDED = 2
+# RESULT_MEMORY_LIMIT_EXCEEDED = 3
+# RESULT_RUNTIME_ERROR = 4
+# RESULT_SYSTEM_ERROR = 5
+# RESULT_WRONG_ANSWER = -1
 
 
 class JudgerUtil:
@@ -24,7 +30,7 @@ class JudgerUtil:
         self.compile_record_obj = None
 
     def compile_c_src(self, c_src_file, exe_file):
-        cmd = "gcc -g {0} -o {1} -lseccomp".format(c_src_file, exe_file)
+        cmd = "gcc {0} -o {1}".format(c_src_file, exe_file)
         compiling = Popen(
             cmd,
             shell=True,
@@ -35,28 +41,28 @@ class JudgerUtil:
         rst = compiling.stdout.read()
         err = compiling.stderr.read()
         if len(err) == 0:
-            if len(rst) == 0:
-                rst_str = "Success"
-            else:
-                rst_str = str(rst)
             self.save_compile_record(
                 commit_record=self.commit_record_obj,
                 exe_path=exe_file,
-                result=rst_str
+                success=True,
+                ext=str(rst)
             )
             return True
         self.save_compile_record(
             commit_record=self.commit_record_obj,
             exe_path=exe_file,
-            result=str(err)
+            success=False,
+            ext=str(err)
         )
         return False
 
-    def save_compile_record(self, commit_record, exe_path, result):
+    def save_compile_record(self, commit_record, exe_path, success, ext):
         record = CompileSrcRecord(
             commit_record=commit_record,
             exe_path=exe_path,
-            result=result)
+            success=success,
+            ext=ext
+        )
         record.save()
         self.compile_record_obj = record
 
@@ -83,24 +89,25 @@ class JudgerUtil:
             self.save_judge_record(rst)
 
     def run_simple(self, exe_path, in_path, out_path):
-        work_dir = os.path.dirname(exe_path)
-        with open(work_dir + "/temp.out", "w") as ftemp:
-            with open(in_path, "r") as fin:
-                run_config = {
-                    'args': ['./' + str(exe_path)],
-                    "fd_in": fin.fileno(),
-                    "fd_out": ftemp.fileno(),
-                    "timelimit": self.get_time_limit(),
-                    "memorylimit": self.get_memory_limit()
-                }
-                rst = lorun.run(run_config)
-                if rst["result"] == 0:
-                    with open(out_path) as fout:
-                        check_rst = lorun.check(fout.fileno(), ftemp.fileno())
-                        os.remove(work_dir + "/temp.out")
-                        if check_rst != 0:
-                            return {"result": check_rst}
-                return rst
+        rst = _judger.run(
+            max_cpu_time=self.get_time_limit(),
+            max_real_time=self.get_time_limit() * 10,
+            max_memory=self.get_memory_limit() * 1024 * 1024,
+            max_output_size=_judger.UNLIMITED,
+            max_process_number=200,
+            max_stack=32 * 1024 * 1024,
+            exe_path=exe_path,
+            input_path=in_path,
+            output_path=out_path,
+            error_path=out_path,
+            args=[],
+            env=[],
+            log_path="judge.log",
+            seccomp_rule_name="c_cpp",
+            uid=0,
+            gid=0
+        )
+        return rst
 
     def get_problem_type(self):
         return self.commit_record_obj.problem_type
@@ -129,7 +136,7 @@ class JudgerUtil:
         programme = self.get_programme()
         if programme:
             return programme.memory_limit
-        return 20000
+        return 256
 
     def get_testcase_count(self):
         programme = self.get_programme()

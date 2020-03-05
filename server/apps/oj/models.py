@@ -34,7 +34,7 @@ class Programme(Problem):
     input_demo = models.TextField(default='', blank=True)
     output_demo = models.TextField(default='', blank=True)
     time_limit = models.IntegerField(default=1000)  # ms
-    memory_limit = models.IntegerField(default=20000)  # KB
+    memory_limit = models.IntegerField(default=256)  # MB
     testcase_count = models.IntegerField(default=0)
     testcase_dir = models.CharField(default='', max_length=256)
 

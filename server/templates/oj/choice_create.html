@@ -125,7 +125,9 @@
             dataType: "json",
             data: JSON.stringify(json),
             success: function(data){
-
+                if (data.msg == 'done') {
+                    window.location = '/oj/problems_list';
+                }
             }
         });
     }
