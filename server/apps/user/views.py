@@ -1,3 +1,5 @@
+from apscheduler.schedulers.background import BackgroundScheduler
+from django_apscheduler.jobstores import DjangoJobStore, register_events, register_job
 from django.shortcuts import render, HttpResponse, redirect
 from django.views.decorators.http import require_http_methods
 from django.http import FileResponse
@@ -11,7 +13,33 @@ import json
 import os
 import time
 import base64
+import datetime
 # Create your views here.
+
+
+try:
+    scheduler = BackgroundScheduler()
+    scheduler.add_jobstore(DjangoJobStore(), "default")
+
+    @register_job(scheduler, 'cron', day_of_week='sat', hour='8', minute='00', second='00', id='remove_overdue_record')
+    def remove_overdue_record():
+        td = datetime.date.today()
+        overdue = datetime.datetime(td.year, td.month - 1, td.day, 8, 0, 0)
+        loginrecords = LoginRecord.objects.filter(time__lt=overdue)
+        loginrecords.delete()
+        certifyrecords = EmailCertificationRecord.objects.filter(time__lt=overdue)
+        certifyrecords.delete()
+        changepwdrecords = ChangePasswordRecord.objects.filter(time__lt=overdue)
+        changepwdrecords.delete()
+        certifysentrecords = CertificationSentRecord.objects.filter(time__lt=overdue)
+        certifysentrecords.delete()
+        verifysent = VerifyCodeSentRecord.objects.filter(time__lt=overdue)
+        verifysent.delete()
+    register_events(scheduler)
+    scheduler.start()
+except Exception as e:
+    print(e)
+    scheduler.shutdown()
 
 
 def index(request):

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+
 {% load staticfiles %}
 {% block js %}
     <script type="text/javascript" src="{% static 'js/ace/src/ace.js' %}"></script>
@@ -7,14 +8,9 @@
     <script type="text/javascript" src="{% static 'js/ace/src/mode-c_cpp.js' %}"></script>
     <script src="https://cdn.bootcss.com/holder/2.9.6/holder.min.js"></script>
 {% endblock %}
-{% block style %}
-<style type="text/css">
-    #question {position:absolute;left:1px;top:52px;bottom: 52px; width:49%;z-index:1;overflow-y: auto}
-    #answer {position:absolute;right:1px;top:52px;bottom: 52px;width:49%;z-index:1;overflow-y: auto}
-    #editor {margin: 0;height:90%;width:100%;border-right:1px solid #ddd;}
-</style>
-{% endblock %}
-{% block special %}
+
+{% block content %}
+{% if request.session.identity != '1' %}
     <div id="question">
         <div id="prog" class="panel panel-default">
             <div class="panel-body">
@@ -51,15 +47,11 @@
                     </div>
                 </div>
                 {% endif %}
-                {% if request.session.identity == '1' %}
-
-                {% endif %}
             </div>
         </div>
     </div>
-{% if request.session.identity != '1' %}
     <div id="answer">
-        <pre id="editor"></pre>
+        <pre id="editor" style="height: 500px;"></pre>
         <div class="form-inline">
             {% if not request.session.identity %}
             <button class="btn btn-disabled" disabled="disabled">提交</button>
@@ -131,5 +123,123 @@
         });
     }
 </script>
+{% elif request.session.identity == '1' %}
+<div id="failAlert" class="alert alert-danger hide">
+</div>
+<form action="/oj/programme/{{ programme.id }}/modify" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <button type="button" class="btn btn-default" onclick="set_input()">修改</button>
+            <button type="button" id="btn_remove" class="btn btn-danger" style="float: right;" onclick="remove()" disabled>
+                <span class="glyphicon glyphicon-trash"></span> 删除
+            </button>
+        </div>
+        <div class="panel-body">
+            <div class="form-group">
+                <label>标题:</label>
+                <input type="text" name="title" value="{{ programme.title }}" class="form-control" readonly required>
+                <label>内容:</label>
+                <textarea name="detail" rows="7" class="form-control" readonly required>{{ programme.detail }}</textarea>
+                <label>输入描述:</label>
+                <textarea class="form-control" rows="2" name="input_desc" readonly>{{ programme.input_desc }}</textarea>
+                <label>输出描述:</label>
+                <textarea class="form-control" rows="2" name="output_desc" readonly>{{ programme.output_desc }}</textarea>
+                <label>输入示例:</label>
+                <textarea class="form-control" rows="2" name="input_demo" readonly>{{ programme.input_demo }}</textarea>
+                <label>输出示例:</label>
+                <textarea class="form-control" rows="2" name="output_demo" readonly>{{ programme.output_demo }}</textarea>
+                <label>测试用例:</label>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="form-inline">
+                            <label>测试用例个数:</label>
+                            &nbsp;
+                            <input type="number" class="form-control" name="testcase_count" value="{{ programme.testcase_count }}" required readonly>
+                            <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="right" title="测试用例的个数"></span>
+                            <a href="/oj/programme/{{ programme.id }}/get_testcase">查看测试用例</a>
+                        </div>
+                        <br>
+                        <div class="form-inline">
+                            <label>上传新的测试用例:</label>
+                            &nbsp;
+                            <input type="file" class="form-control" name="testcase_zip" accept=".zip" readonly>
+                            <span class="glyphicon glyphicon-question-sign" data-container="body" data-toggle="popover" data-placement="right" title="说明" data-content="<p>测试用例中的文件格式:</p><p>用例输入为'.in'文件；输出为'.out'文件。'.in'文件与'.out'文件成对存在，一对为一个测试用例，测试用例个数要和前面输入的'测试用例个数'相同。</p><p>压缩文件中的文件排列格式:</p><p>.</p><p>|--0.in</p><p>|--0.out</p><p>|--1.in</p><p>|--1.out</p><p>|--...</p><p>以此类推。</p>"></span>
+                        </div>
+                    </div>
+                </div>
+                <label>限制条件:</label>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="form-inline">
+                            <label>运行时间限制:</label>
+                            <input type="number" name="time_limit" class="form-control" value="{{ programme.time_limit }}" required readonly>
+                            <label>ms</label>
+                        </div>
+                        <br>
+                        <div class="form-inline">
+                            <label>内存使用限制:</label>
+                            <input type="number" name="memory_limit" class="form-control" value="{{ programme.memory_limit }}" required readonly>
+                            <label>MB</label>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <button id="btn_commit" type="submit" class="btn btn-primary" disabled>提交</button>
+                <button id="btn_cancel" class="btn btn-default" onclick="cancel()" disabled>取消</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript">
+    $(function () {
+        $("[data-toggle='tooltip']").tooltip({html: true});
+    });
+    $(function () {
+        $("[data-toggle='popover']").popover({html: true});
+    });
+    function set_input() {
+        $("input").removeAttr("readonly");
+        $("textarea").removeAttr("readonly");
+        $("#btn_add_option").attr("disabled", false);
+        $("#btn_del_option").attr("disabled", false);
+        $("#btn_remove").attr("disabled", false);
+        $("#btn_commit").attr("disabled", false);
+        $("#btn_cancel").attr("disabled", false);
+    }
+    function cancel() {
+        $("input").attr("readonly", "readonly");
+        $("textarea").attr("readonly", "readonly");
+        $("#btn_add_option").attr("disabled", true);
+        $("#btn_del_option").attr("disabled", true);
+        $("#btn_remove").attr("disabled", true);
+        $("#btn_commit").attr("disabled", true);
+        $("#btn_cancel").attr("disabled", true);
+    }
+    function remove() {
+        var formdata = new FormData();
+        var token = $.cookie('csrftoken');
+        formdata.append("operation", "remove");
+        $.ajax({
+            url: '/oj/programme/{{ programme.id }}/modify',
+            type: 'post',
+            headers:{'X-CSRFToken': token},
+            processData: false,
+            contentType: false,
+            data: formdata,
+            success: function (data) {
+                if (data.msg == "done") {
+                    window.location('/oj/problems_list');
+                }
+                else {
+                    $("failAlert").append("<p>删除失败</p>");
+                    $("failAlert").removeClass("hide").addClass("in");
+                }
+            }
+        });
+    }
+</script>
+
 {% endif %}
-{% endblock %}
+{% endblock %}  

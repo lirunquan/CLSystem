@@ -55,3 +55,11 @@ def make_dir(dir_name):
 
 def remove_file(filename):
     os.remove(filename)
+
+
+def make_zip(src_dir, out_zip):
+    zf = zipfile.ZipFile(out_zip, "w", zipfile.zlib.DEFLATED)
+    for file in os.listdir(src_dir):
+        filepath = os.path.join(src_dir, file)
+        zf.write(filepath, file)
+    zf.close()

@@ -16,6 +16,9 @@ urlpatterns = [
     path('programme/<int:p_id>/index', views.programme_index, name='prog_index'),
     path('programme/<int:p_id>/commit', views.programme_commit, name='prog_commit'),
     path('programme/<int:p_id>/result', views.programme_result, name='prog_result'),
+    path('programme/<int:p_id>/get_testcase', views.get_tc_zip, name='testcase'),
+    path('programme/<int:p_id>/modify', views.programme_modify, name='prog_modify'),
     path('choice/<int:c_id>/index', views.choice_index, name='choice_index'),
     path('choice/<int:c_id>/commit', views.choice_commit, name='choice_commit'),
+    path('choice/<int:c_id>/modify', views.choice_modify, name='choice_modify'),
 ]

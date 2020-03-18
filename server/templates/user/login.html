@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
-
+{% if message %}
+<div class="alert alert-warning">
+    <strong>{{ message }}</strong>
+</div>
+{% endif %}
 <form id="login_form" class="col-md-6" action="/user/login" method="post" onsubmit="return encode_pwd()">
     {% csrf_token %}
     <div class="panel panel-primary">
@@ -44,8 +48,6 @@
         </div>
     </div>
 </form>
-<h3 class="text-warning">{{ message }}</h3>
-
 <script>
     function refresh_code(obj) {
         obj.src += "?"+Math.random()

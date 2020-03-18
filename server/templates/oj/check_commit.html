@@ -1,11 +1,36 @@
 {% extends "base.html" %}
 {% block content %}
+<div>
+    <form method="get" action="/oj/check_commit">
+        {% csrf_token %}
+        <div class="form-inline">
+            <label>题目编号:</label>
+            <input type="text" name="p_id" class="form-control">
+            <label>提交者:</label>
+            <input type="text" name="account" class="form-control">
+            <label>结果:</label>
+            <select name="result" class="form-control">
+                <option value="">不限</option>
+                <option value="ACCEPT">ACCEPT</option>
+                <option value="CPU_TIME_LIMIT_EXCEEDED">CPU_TIME_LIMIT_EXCEEDED</option>
+                <option value="REAL_TIME_LIMIT_EXCEEDED">REAL_TIME_LIMIT_EXCEEDED</option>
+                <option value="MEMORY_LIMIT_EXCEEDED">MEMORY_LIMIT_EXCEEDED</option>
+                <option value="RUNTIME_ERROR">RUNTIME_ERROR</option>
+                <option value="SYSTEM_ERROR">SYSTEM_ERROR</option>
+                <option value="WRONG_ANSWER">WRONG_ANSWER</option>
+                <option value="COMPILE_ERROR">COMPILE_ERROR</option>
+            </select>
+            <button type="summit" class="btn btn-default">
+                <span class="glyphicon glyphicon-search"></span>搜索
+            </button>
+        </div>
+    </form>
+</div>
+<br>
 <div class="panel panel-default">
     <div class="panel-heading">
         <div class="panel-title">
-            <label>结果</label>
-            &nbsp;
-            <label>共{{ count }}条</label>
+            <label>提交记录</label>
             <button class="btn btn-link" style="float: right;" onclick="refresh()">
                 <span class="glyphicon glyphicon-refresh"></span>
             </button>
@@ -83,6 +108,13 @@
     </div>
 </div>
 <script type="text/javascript">
+    var select = document.getElementsByTagName('select')[0];
+    for (var i = 0; i < select.options.length; i++) {
+        if (select.options[i].value == "{{ status }}") {
+            select.options[i].selected = true;
+            break;
+        }
+    }
     function refresh() {
         window.location.reload();
     }

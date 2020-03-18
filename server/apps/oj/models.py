@@ -11,12 +11,12 @@ PROBLEM_TYPE = (
 
 
 def choice_options():
-    return {
-        "A": "",
-        "B": "",
-        "C": "",
-        "D": ""
-    }
+    return [
+        {"sign": "A", "content": ""},
+        {"sign": "B", "content": ""},
+        {"sign": "C", "content": ""},
+        {"sign": "D", "content": ""}
+    ]
 
 
 class Problem(models.Model):

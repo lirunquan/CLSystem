@@ -89,3 +89,10 @@ class JudgeRecord(models.Model):
     time = models.DateTimeField(auto_now=True)
     compile_record = models.OneToOneField(CompileSrcRecord, on_delete=models.CASCADE)
     result = JSONField(default=judge_result)
+
+
+class CommitMissionRecord(models.Model):
+    time = models.DateTimeField(auto_now_add=True)
+    account = models.CharField(max_length=50, default='')
+    mission_id = models.IntegerField(default=0)
+    saved_path = models.CharField(max_length=256, default='')

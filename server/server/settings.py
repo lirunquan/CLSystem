@@ -47,7 +47,6 @@ INSTALLED_APPS = [
     'apps.oj',
     'apps.course',
     'django_apscheduler',
-    'django_q',
 ]
 
 MIDDLEWARE = [
@@ -147,7 +146,7 @@ EMAIL_HOST_PASSWORD = 'liruner9576'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-SERVER_HOST = "http://localhost:10086"
+SERVER_HOST = "http://192.168.2.112:10086"
 
 Q_CLUSTER = {
     # 'workers': 4,

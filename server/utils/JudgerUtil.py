@@ -1,5 +1,6 @@
 import _judger
 import os
+import filecmp
 from subprocess import Popen, PIPE
 from apps.record.models import CompileSrcRecord, JudgeRecord
 from apps.oj.models import Programme, Choice
@@ -14,7 +15,20 @@ RESULT_STR = [
     "SYSTEM_ERROR",
     "WRONG_ANSWER"
 ]
-# _judger
+ERROR_STR = [
+    "SUCCESS",
+    "INVALID_CONFIG",
+    "FORK_FAILED",
+    "PTHREAD_FAILED",
+    "WAIT_FAILE",
+    "ROOT_REQUIRED",
+    "LOAD_SECCOMP_FAILED",
+    "SETRLIMIT_FAILED",
+    "DUP2_FAILED",
+    "SETUID_FAILED",
+    "EXECVE_FAILED"
+]
+# _judger result
 # RESULT_SUCCESS = 0
 # RESULT_CPU_TIME_LIMIT_EXCEEDED = 1
 # RESULT_REAL_TIME_LIMIT_EXCEEDED = 2
@@ -22,6 +36,18 @@ RESULT_STR = [
 # RESULT_RUNTIME_ERROR = 4
 # RESULT_SYSTEM_ERROR = 5
 # RESULT_WRONG_ANSWER = -1
+# error
+# SUCCESS = 0
+# INVALID_CONFIG = -1
+# FORK_FAILED = -2
+# PTHREAD_FAILED = -3
+# WAIT_FAILED = -4
+# ROOT_REQUIRED = -5
+# LOAD_SECCOMP_FAILED = -6
+# SETRLIMIT_FAILED = -7
+# DUP2_FAILED = -8
+# SETUID_FAILED = -9
+# EXECVE_FAILED = -10
 
 
 class JudgerUtil:
@@ -74,7 +100,7 @@ class JudgerUtil:
             exe_path = src_dir + os.path.sep + "main"
             if not self.compile_c_src(src_path, exe_path):
                 rst = {}
-                rst['result'] = RESULT_STR[7]
+                rst['result'] = "COMPILE_ERROR"
                 self.save_judge_record(rst)
                 return
             tc_count = self.get_testcase_count()
@@ -84,11 +110,17 @@ class JudgerUtil:
                 in_file = os.path.join(tc_dir, '%d.in' % i)
                 out_file = os.path.join(tc_dir, '%d.out' % i)
                 simple_rst = self.run_simple(exe_path, in_file, out_file)
-                simple_rst['result'] = RESULT_STR[simple_rst['result']]
+                if simple_rst["error"] == 0:
+                    simple_rst['result'] = RESULT_STR[simple_rst['result']]
+                else:
+                    simple_rst["error"] = ERROR_STR[simple_rst["error"]]
                 rst.append(simple_rst)
             self.save_judge_record(rst)
 
     def run_simple(self, exe_path, in_path, out_path):
+        work_dir = os.path.dirname(exe_path)
+        temp_out = os.path.join(work_dir, "temp.out")
+        error_out = os.path.join(work_dir, "error.out")
         rst = _judger.run(
             max_cpu_time=self.get_time_limit(),
             max_real_time=self.get_time_limit() * 10,
@@ -98,8 +130,8 @@ class JudgerUtil:
             max_stack=32 * 1024 * 1024,
             exe_path=exe_path,
             input_path=in_path,
-            output_path=out_path,
-            error_path=out_path,
+            output_path=temp_out,
+            error_path=error_out,
             args=[],
             env=[],
             log_path="judge.log",
@@ -107,6 +139,8 @@ class JudgerUtil:
             uid=0,
             gid=0
         )
+        if not filecmp.cmp(temp_out, out_path):
+            rst["result"] = -1
         return rst
 
     def get_problem_type(self):

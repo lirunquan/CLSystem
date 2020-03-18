@@ -10,7 +10,7 @@
     <div class="list-group">
         {% for data in p_data %}
         <div class="list-group-item">
-            <a href="/oj/programme/{{ data.id }}/index">{{ data.id }}.{{ data.title }}</a>
+            <a href="/oj/programme/{{ data.id }}/index">{{ data.title }}</a>
         </div>
         {% endfor %}
     </div>
@@ -46,7 +46,7 @@
     <div class="list-group">
         {% for data in c_data %}
         <div class="list-group-item">
-            <a href="/oj/choice/{{ data.id }}/index">{{ data.id }}.{{ data.title }}</a>
+            <a href="/oj/choice/{{ data.id }}/index">{{ data.title }}</a>
         </div>
         {% endfor %}
     </div>

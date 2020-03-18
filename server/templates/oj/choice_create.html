@@ -2,6 +2,9 @@
 
 {% block content %}
 {% if request.session.identity == '1' %}
+    <div id="dangerAlert" class="alert alert-danger hide">
+        <p>请将信息填写完整</p>
+    </div>
     <label>创建选择题</label>
     &nbsp;
     <button class="bnt btn-link" data-toggle="modal" data-target="#uploadModal">批量导入</button>
@@ -11,11 +14,11 @@
             <div class="panel-body">
                 <div class="form-group">
                     <label>标题:</label>
-                    <input type="text" class="form-control" name="title">
+                    <input type="text" class="form-control" name="title" required>
                 </div>
                 <div class="form-group">
                     <label>内容:</label>
-                    <textarea class="form-control" rows="5" name="detail"></textarea>
+                    <textarea class="form-control" rows="5" name="detail" required></textarea>
                 </div>
                 <label>选项:</label>
                 &nbsp;
@@ -25,33 +28,33 @@
                     <div id="opt_panel" class="panel-body">
                         <div id="opt_A" class="form-inline">
                             <span>A:</span>
-                            <input type="text" class="form-control" name="A">
+                            <input type="text" class="form-control" name="A" required>
                         </div>
                         <div id="opt_B" class="form-inline">
                             <br>
                             <span>B:</span>
-                            <input type="text" class="form-control" name="B">
+                            <input type="text" class="form-control" name="B" required>
                         </div>
                         <div id="opt_C" class="form-inline">
                             <br>
                             <span>C:</span>
-                            <input type="text" class="form-control" name="C">
+                            <input type="text" class="form-control" name="C" required>
                         </div>
                         <div id="opt_D" class="form-inline">
                             <br>
                             <span>D:</span>
-                            <input type="text" class="form-control" name="D">
+                            <input type="text" class="form-control" name="D" required>
                         </div>
                     </div>
                 </div>
                 <div class="form-check">
                     <label class="form-check-label">
-                        <input type="checkbox" class="form-check-input" name="multi">  多选
+                        <input type="checkbox" class="form-check-input" name="multi" required>  多选
                     </label>
                 </div>
                 <div class="form-group">
                     <label>参考答案:</label><br>
-                    <input type="text" name="reference" class="form-control">
+                    <input type="text" name="reference" class="form-control" required>
                 </div>
             </div>
         </div>
@@ -70,7 +73,7 @@
                     <p>说明：请下载模板并按照模板填写需要创建的选择题</p>
                     <p><a href="/oj/choice/template_download">模板下载</a></p>
                     <label>上传文件：</label>
-                    <input class="form-control" id="file_post" type="file" name="excel" accept=".xls,.xlsx">
+                    <input class="form-control" id="file_post" type="file" name="excel" accept=".xls,.xlsx" required>
                     <br>
                     <button type="submit" class="btn btn-primary">上传</button>
                 </form>
@@ -88,7 +91,7 @@
         var element = "<div id='opt_" + num_check() + "' class='form-inline'>\n "+
         "<br>\n"+
         "<span>" + num_check() + ":</span>\n"+
-        "<input type='text' class='form-control' name='"+ num_check() +"'>\n"+
+        "<input type='text' class='form-control' name='"+ num_check() +"' required>\n"+
         "</div>\n";
         $("#opt_panel").append(element);
     }
@@ -107,12 +110,12 @@
     function summit() {
         var token = $.cookie('csrftoken');
         var json = {};
-        var options = {};
+        var options = [];
         json["title"] = $("input[name='title']").val();
         json["detail"] = $("textarea[name='detail']").val();
         for (var i = 0; i < options_count; i++) {
             s = String.fromCharCode(i + 65);
-            options[s] = $("input[name="+s+"]").val();
+            options.push({"sign": s, "content": $("input[name="+s+"]").val()})
         }
         json["options"] = options;
         json["multichoice"] = document.getElementsByName('multi')[0].checked;
@@ -127,6 +130,9 @@
             success: function(data){
                 if (data.msg == 'done') {
                     window.location = '/oj/problems_list';
+                }
+                else {
+                    $("#dangerAlert").removeClass("hide").addClass("in");
                 }
             }
         });
