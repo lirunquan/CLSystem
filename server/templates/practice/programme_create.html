@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if request.session.identity == '1' %}
+<form action="/practice/programme/create" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="form-group">
+                <label>标题:</label>
+                <input type="text" class="form-control" name="title" required>
+            </div>
+            <div class="form-group">
+                <label>内容:</label>
+                <textarea class="form-control" rows="6" name="detail" required></textarea>
+            </div>
+            <div class="form-group">
+                <label>输入描述:</label>
+                <textarea class="form-control" rows="2" name="input_desc" required></textarea>
+            </div>
+            <div class="form-group">
+                <label>输出描述:</label>
+                <textarea class="form-control" rows="2" name="output_desc" required></textarea>
+            </div>
+            <div class="form-group">
+                <label>输入示例:</label>
+                <textarea class="form-control" rows="4" name="input_demo"></textarea>
+            </div>
+            <div class="form-group">
+                <label>输出示例:</label>
+                <textarea class="form-control" rows="4" name="output_demo"></textarea>
+            </div>
+            <label>测试用例:</label>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="form-inline">
+                        <label>测试用例个数:</label>
+                        &nbsp;
+                        <input type="number" class="form-control" name="testcase_count" required>
+                        <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="right" title="测试用例的个数"></span>
+                    </div>
+                    <br>
+                    <div class="form-inline">
+                        <label>上传测试用例:</label>
+                        &nbsp;
+                        <input type="file" class="form-control" name="testcase_zip" accept=".zip" required>
+                        <span class="glyphicon glyphicon-question-sign" data-container="body" data-toggle="popover" data-placement="right" title="说明" data-content="<p>测试用例中的文件格式:</p><p>用例输入为'.in'文件；输出为'.out'文件。'.in'文件与'.out'文件成对存在，一对为一个测试用例，测试用例个数要和前面输入的'测试用例个数'相同。</p><p>压缩文件中的文件排列格式:</p><p>.</p><p>|--0.in</p><p>|--0.out</p><p>|--1.in</p><p>|--1.out</p><p>|--...</p><p>以此类推。</p>"></span>
+                    </div>
+                </div>
+            </div>
+            <label>限制条件:</label>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="form-inline">
+                        <label>运行时间限制:</label>
+                        <input type="number" name="time_limit" class="form-control" value="1000" required>
+                        <label>ms</label>
+                    </div>
+                    <br>
+                    <div class="form-inline">
+                        <label>内存使用限制:</label>
+                        <input type="number" name="memory_limit" class="form-control" value="256" required>
+                        <label>MB</label>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-primary" type="summit">提交</button>
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+    $(function () {
+        $("[data-toggle='tooltip']").tooltip({html: true});
+    });
+    $(function () {
+        $("[data-toggle='popover']").popover({html: true});
+    });
+</script>
+{% elif request.session.identity == '2' %}
+<div class="alert alert-warning">
+    <p>
+        <strong>警告:</strong>
+        你未获取操作本页面的权限
+    </p>
+    <a href="javascript:history.go(-1)">返回</a>
+</div>
+{% else %}
+<div class="alert alert-warning">
+    <label>请先</label>
+    <a href="/user/login">登录</a>
+</div>
+{% endif %}
+{% endblock %}

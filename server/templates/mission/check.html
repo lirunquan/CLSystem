@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <label>{{ mission.title }}</label>
+    </div>
+    <div class="panel-body">
+        <table id="commit_table" class="table table-hover">
+            <thead>
+                <tr>
+                    <th>提交者</th>
+                    <th>时间</th>
+                    <th>#</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for commit in commit_list %}
+                <tr>
+                    <td>{{ commit.account }}</td>
+                    <td>{{ commit.time }}</td>
+                    <td><a href="/mission/{{ mission.id }}/get_commit?account={{ commit.account }}">下载文件</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div id="page" class="text-center">
+            <ul class="pagination">
+                <li>
+                    {% if commit_list.has_previous %}
+                    <a href="?page={{ commit_list.previous_page_number }}">&laquo;</a>
+                    {% endif %}
+                </li>
+                {% for i in commit_list.paginator.page_range %}
+                {% if i == commit_list.number %}
+                <li class="current">
+                    <a href="?page={{ commit_list.number }}">{{ i }}</a>
+                </li>
+                {% else %}
+                <li><a href="?page={{ i }}">{{ i }}</a></li>
+                {% endif %}
+                {% endfor %}
+                <li>
+                    {% if commit_list.has_next %}
+                    <a href="?page={{ commit_list.next_page_number }}">&raquo;</a>
+                    {% endif %}
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

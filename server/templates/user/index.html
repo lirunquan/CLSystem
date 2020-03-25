@@ -1,14 +1,35 @@
 {% extends "base.html" %}
 
 {% block content %}
-<body>
-<p>{{ user.account }}</p>
-<p>{{ user.email }}</p>
-<p>{{ user.real_name }}</p>
-<p>
-    <a href="/user/changePassword">修改密码</a>
-</p>
-<p>
-    <a href="/user/logout">退出</a>
-</p>
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="form-inline">
+            <label>
+                {% if user.identity == '1' %}
+                工号:
+                {% elif user.identity == '2' %}
+                学号:
+                {% endif %}
+            </label>
+            &nbsp;
+            <label>{{ user.account }}</label>
+            &nbsp;&nbsp;&nbsp;
+            <label>姓名:</label>
+            &nbsp;
+            <label>{{ user.real_name }}</label>
+            &nbsp;
+            <a href="/user/changePassword">修改密码</a>
+            &nbsp;
+            <a href="/user/logout">退出</a>
+        </div>
+        <br>
+        <div class="form-inline">
+            <label>邮箱:</label>
+            &nbsp;
+            <label>{{ user.email }}</label>
+            &nbsp;
+            <a href="/user/email/certificate">更换</a>
+        </div>
+    </div>
+</div>
 {% endblock %}

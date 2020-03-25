@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block content %}
+<div>
+    <form method="get" action="/practice/check_commit">
+        {% csrf_token %}
+        <div class="form-inline">
+            <label>题目编号:</label>
+            <input type="text" name="p_id" class="form-control">
+            <label>提交者:</label>
+            <input type="text" name="account" class="form-control">
+            <label>结果:</label>
+            <select name="result" class="form-control">
+                <option value="">不限</option>
+                <option value="ACCEPT">ACCEPT</option>
+                <option value="CPU_TIME_LIMIT_EXCEEDED">CPU_TIME_LIMIT_EXCEEDED</option>
+                <option value="REAL_TIME_LIMIT_EXCEEDED">REAL_TIME_LIMIT_EXCEEDED</option>
+                <option value="MEMORY_LIMIT_EXCEEDED">MEMORY_LIMIT_EXCEEDED</option>
+                <option value="RUNTIME_ERROR">RUNTIME_ERROR</option>
+                <option value="SYSTEM_ERROR">SYSTEM_ERROR</option>
+                <option value="WRONG_ANSWER">WRONG_ANSWER</option>
+                <option value="COMPILE_ERROR">COMPILE_ERROR</option>
+            </select>
+            <button type="summit" class="btn btn-default">
+                <span class="glyphicon glyphicon-search"></span>搜索
+            </button>
+        </div>
+    </form>
+</div>
+<br>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title">
+            <label>提交记录</label>
+            <button class="btn btn-link" style="float: right;" onclick="refresh()">
+                <span class="glyphicon glyphicon-refresh"></span>
+            </button>
+        </div>
+    </div>
+    <div class="panel-body">
+        <table id="result_table" class="table table-hover">
+            <thead>
+                <tr>
+                    <th>题目</th>
+                    <th>提交者</th>
+                    <th>时间</th>
+                    <th>结果</th>
+                    <th>#</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in results %}
+                {% if r.result == 'ACCEPT' %}
+                <tr class="success">
+                {% else %}
+                <tr class="danger"></tr>
+                {% endif %}
+                    <td>{{ r.title }}</td>
+                    <td>{{ r.account }}</td>
+                    <td>{{ r.time }}</td>
+                    {% if r.result == 'ACCEPT' %}
+                    <td style="color: green">
+                    {% else %}
+                    <td style="color: red">
+                    {% endif %}
+                        <strong>{{ r.result }}</strong>
+                    </td>
+                    <td>
+                        <button class="btn btn-link btn-xs" type="button" data-toggle="modal" data-target="#codeModal_{{ r.id }}">查看代码</button>
+                    </td>
+                    <div class="modal fade" id="codeModal_{{ r.id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                    <label>查看代码</label>
+                                </div>
+                                <div class="modal-body">
+                                    <textarea rows="6" class="form-control" readonly="readonly">{{ r.code }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="text-center">
+            <ul class="pagination">
+                <li>
+                    {% if results.has_previous %}
+                        <a href="?p_page={{ results.previous_page_number }}">&laquo;</a>
+                    {% endif %}
+                </li>
+                {% for i in results.paginator.page_range %}
+                    {% if i == results.number %}
+                        <li class="current"><a href="?page={{ results.number }}">{{ i }}</a></li>
+                    {% else %}
+                        <li><a href="?page={{ i }}">{{ i }}</a></li>
+                    {% endif %}
+                {% endfor %}
+                <li>
+                    {% if results.has_next %}
+                        <a href="?page={{ results.next_page_number }}">&raquo;</a>
+                    {% endif %}
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var select = document.getElementsByTagName('select')[0];
+    for (var i = 0; i < select.options.length; i++) {
+        if (select.options[i].value == "{{ status }}") {
+            select.options[i].selected = true;
+            break;
+        }
+    }
+    function refresh() {
+        window.location.reload();
+    }
+</script>
+{% endblock %}

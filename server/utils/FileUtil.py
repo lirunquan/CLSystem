@@ -3,6 +3,7 @@ import json
 import zipfile
 import shutil
 import os
+from subprocess import Popen, PIPE
 
 
 def df_to_json(df):
@@ -16,9 +17,10 @@ def handle_excel(excel_path, cols):
 
 
 def handle_choice_excel(excel_path):
-    data = handle_excel(excel_path,
-                        ["title", "detail", "A", "B", "C", "D", "multichoice", "reference"]
-                        )
+    data = handle_excel(
+        excel_path,
+        ["title", "detail", "A", "B", "C", "D", "multichoice", "reference"]
+    )
     return data
 
 
@@ -63,3 +65,25 @@ def make_zip(src_dir, out_zip):
         filepath = os.path.join(src_dir, file)
         zf.write(filepath, file)
     zf.close()
+
+
+def handle_ppt(ppt_path, out_dir):
+    cmd = "libreoffice --invisible --convert-to pdf " +\
+        ppt_path +\
+        " --outdir " +\
+        out_dir
+    print(cmd)
+    shell = Popen(
+        cmd,
+        shell=True,
+        stdin=PIPE,
+        stderr=PIPE,
+        stdout=PIPE
+    )
+    rst = shell.stdout.read()
+    if len(rst):
+        stuffix = os.path.splitext(ppt_path)[-1]
+        pdf_path = ppt_path.replace(stuffix, ".pdf")
+        return pdf_path
+    print(str(shell.stderr.read(), encoding='utf-8'))
+    return ''

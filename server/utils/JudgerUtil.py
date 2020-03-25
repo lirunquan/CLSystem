@@ -2,8 +2,8 @@ import _judger
 import os
 import filecmp
 from subprocess import Popen, PIPE
-from apps.record.models import CompileSrcRecord, JudgeRecord
-from apps.oj.models import Programme, Choice
+from record.models import CompileSrcRecord, JudgeRecord
+from practice.models import Programme, Choice
 
 
 RESULT_STR = [
@@ -71,14 +71,14 @@ class JudgerUtil:
                 commit_record=self.commit_record_obj,
                 exe_path=exe_file,
                 success=True,
-                ext=str(rst)
+                ext=str(rst, encoding='utf-8')
             )
             return True
         self.save_compile_record(
             commit_record=self.commit_record_obj,
             exe_path=exe_file,
             success=False,
-            ext=str(err)
+            ext=str(err, encoding='utf-8')
         )
         return False
 

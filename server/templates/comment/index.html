@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block js %}
+<script src="https://cdn.bootcss.com/wangEditor/10.0.13/wangEditor.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div id="warnAlert" class="alert alert-warning hide">
+    <button type="button" class="close" onclick="$('#warnAlert').removeClass('in').addClass('hide')" 
+                    aria-hidden="true">
+        &times;
+    </button>
+</div>
+<div id="create" class="form-group">
+    <div id="editor"></div>
+    <br>
+    <p class="text-right">
+        <button class="btn btn-primary" type="button" onclick="leave()">留言</button>
+    </p>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <p class="text-info">本周新增<strong>{{ new_count }}</strong>条留言</p>
+    </div>
+    <div class="panel-body">
+        {% if len == 0 %}
+        <p class="text-center">暂无内容</p>
+        {% else %}
+        <div class="list-group">
+            {% for c in comment_page %}
+            <div class="list-group-item">
+            </div>
+            {%endfor %}
+        </div>
+        <div id="page" class="text-center">
+            <ul class="pagination">
+                <li>
+                    {% if comment_page.has_previous %}
+                        <a href="?page={{ comment_page.previous_page_number }}">&laquo;</a>
+                    {% endif %}
+                </li>
+                {% for i in comment_page.paginator.page_range %}
+                    {% if i == comment_page.number %}
+                        <li class="current"><a href="?page={{ comment_page.number }}">{{ i }}</a></li>
+                    {% else %}
+                        <li><a href="?page={{ i }}">{{ i }}</a></li>
+                    {% endif %}
+                {% endfor %}
+                <li>
+                    {% if comment_page.has_next %}
+                        <a href="?page={{ comment_page.next_page_number }}">&raquo;</a>
+                    {% endif %}
+                </li>
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+<script type="text/javascript">
+    function htmlDecode(text) {
+        var temp = document.createElement("div");
+        temp.innerHTML = text;
+        var output = temp.innerText || temp.textContent;
+        temp = null;
+        return output;
+    }
+    {% if not request.session.account %}
+    $("button").attr("disabled", true);
+    {% endif %}
+    var array = new Array();
+    {% for c in comment_page %}
+    array.push({"wr": "{{ c.writer }}", "ct": "{{ c.content }}", "time": "{{ c.leave_time|date:'Y-m-d H:i' }}"});
+    {% endfor %}
+    for (var i = 0; i < array.length; i++) {
+        var element = "<p>" +
+                      "<strong>" + array[i].wr + ":</strong>" +
+                      "</p>" +
+                      "<div class='panel panel-default'>" +
+                      "<div class='panel-body'>" +
+                      htmlDecode(array[i].ct) +
+                      "</div>" +
+                      "</div>" +
+                      "<p class='text-right'>" +
+                      array[i].time +
+                      "</p>";
+        document.getElementsByClassName('list-group-item')[i].innerHTML = element;
+    }
+    $("div.list-group-item")
+    var E = window.wangEditor;
+    var editor = new E("#editor");
+    editor.customConfig.menus = [
+        'head',
+        'bold',
+        'fontSize',
+        'fontName',
+        'italic',
+        'underline',
+        'strikeThrough',
+        'foreColor',
+        'link',
+        'list',
+        'justify',
+        'quote',
+        'code',
+        'undo',
+        'redo'
+    ];
+    editor.customConfig.zIndex = 10;
+    editor.create();
+
+    function leave() {
+        var text = editor.txt.html().replace(/\n/g,"<br/>");
+        if (editor.txt.text() != '') {
+            var formdata = new FormData();
+            var token = $.cookie('csrftoken');
+            formdata.append("content", text);
+            $.ajax({
+                type: "POST",
+                url: "/comment/create",
+                data: formdata,
+                headers:{'X-CSRFToken': token},
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    if (data.msg == "done") {
+                        window.location.reload();
+                    }
+                }
+            });
+        }
+        else {
+            $("#warnAlert").append("<strong>请勿传空值</strong>");
+            $("#warnAlert").removeClass("hide").addClass("in");
+        }
+    }
+</script>
+{% endblock %}

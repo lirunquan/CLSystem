@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if len == 0 %}
+<div class="panel panel-default">
+    <div class="panel-body">
+        <p class="text-center">暂无内容</p>
+        {% if request.session.identity == '1' %}
+        <p class="text-center text-info">
+            <a href="/notice/create">添加公告</a>
+        </p>
+        {% endif %}
+    </div>
+</div>
+{% else %}
+<div class="panel panel-default">
+    {% if request.session.identity == '1' %}
+    <div class="panel-heading">
+        <a href="/notice/create">添加公告</a>
+    </div>
+    {% endif %}
+    <div class="panel-body">
+        <div class="list-group">
+            {% for n in notices %}
+            <div class="list-group-item text-right" >
+                <a style="float: left;" href="/notice/{{ n.id }}/detail">{{ n.title }}</a>
+                <small>发布于 {{ n.announce_at|date:"Y-m-d H:i" }}</small>
+            </div>
+            {% endfor %}
+        </div>
+        <div id="page" class="text-center">
+            <ul class="pagination">
+                <li>
+                    {% if notices.has_previous %}
+                    <a href="?page={{ notices.previous_page_number }}">&laquo;</a>
+                    {% endif %}
+                </li>
+                {% for i in notices.paginator.page_range %}
+                {% if i == notices.number %}
+                <li class="current">
+                    <a href="?page={{ notices.number }}">{{ i }}</a>
+                </li>
+                {% else %}
+                <li><a href="?page={{ i }}">{{ i }}</a></li>
+                {% endif %}
+                {% endfor %}
+                <li>
+                    {% if notices.has_next %}
+                    <a href="?page={{ notices.next_page_number }}">&raquo;</a>
+                    {% endif %}
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

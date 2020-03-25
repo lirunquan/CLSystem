@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block js %}
+    <script type="text/javascript" src="{% static 'js/ace/src/ace.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/ace/src/ext-language_tools.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/ace/src/theme-monokai.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/ace/src/mode-c_cpp.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div id="warnAlert" class="alert alert-warning hide">
+            <button type="button" class="close" onclick="hide_alert()" 
+                    aria-hidden="true">
+                &times;
+            </button>
+            <div id="err"></div>
+        </div>
+        {% csrf_token %}
+        <div class="form-inline">
+            <label>输入:</label>
+            <input type="text" name="input_str" class="form-control" placeholder="标准输入" style="width: 478px">
+            &nbsp;
+            <button id="btn_submit" class="btn btn-success" onclick="run()" disabled>运行</button>
+            &nbsp;
+            <button class="btn btn-default" onclick="reset_editor()">清空</button>
+        </div>
+        <br>
+        <div>
+            <div class="col-md-6">
+                
+                <div class="form-inline">
+                    <label>代码:</label>
+                    
+                </div>
+                <div id="editor" style="height: 450px"></div>
+            </div>
+            <div class="col-md-6">
+                <label>输出:</label>
+                <textarea id="output" class="form-control" rows="22"></textarea>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var editor = ace.edit("editor");
+    editor.session.setMode("ace/mode/c_cpp");
+    editor.setFontSize(18);
+    editor.setTheme("ace/theme/monokai");
+    editor.setOptions({
+        enableLiveAutocompletion: true,
+        enableSnippets: true,
+        enableBlockSelect: true,
+        enableBasicAutocompletion: true
+    });
+    editor.getSession().on('change', function (e) {
+        var code = editor.getValue().replace(/(\n[\s\t]*\r*\n)/g, '\n').replace(/^[\n\r\n\t]*|[\n\r\n\t]*$/g, '');
+        if (code.length != 0) {
+            $("#btn_submit").attr("disabled", false);
+        }
+        else{
+            $("#btn_submit").attr("disabled", true);
+        }
+    });
+    function reset_editor() {
+        editor.setValue("");
+    }
+    function run() {
+        hide_alert();
+        var token = $.cookie('csrftoken');
+        var code = editor.getValue().replace(/(\n[\s\t]*\r*\n)/g, '\n').replace(/^[\n\r\n\t]*|[\n\r\n\t]*$/g, '');
+        var input = $("input[name='input_str']").val();
+        var json = {"code": code, "input": input};
+        var url = "/tool/run";
+        $.ajax({
+            type: "POST",
+            url: url,
+            headers:{'X-CSRFToken': token},
+            contentType: "application/json",
+            dataType: "json",
+            data: JSON.stringify(json),
+            success: function (data) {
+
+                if (data.msg == "done") {
+                    $("#output").val(data.output);
+                }
+                else if (data.msg == "error") {
+                    $("#output").val("");
+                    $("#err").append("<p><strong>编译失败:</strong></p>")
+                    $("#err").append("<p>" + data.error + "</p>");
+                    $("#warnAlert").removeClass("hide").addClass("in");
+                }
+                else if (data.msg == "failed") {
+                    $("#output").val("");
+                    $("#err").append("<p id='err'><strong>运行失败</strong></p>");
+                    $("#warnAlert").removeClass("hide").addClass("in");
+                }
+            }
+        });
+    }
+    function hide_alert() {
+        $("#err").empty();
+        $('#warnAlert').removeClass('in').addClass('hide');
+    }
+</script>
+{% endblock %}

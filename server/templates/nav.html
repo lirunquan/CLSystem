@@ -1,7 +1,38 @@
-<nav class="navbar navbar-default navbar-fixed-top">
-    {% if request.session.account %}
-    <a href="/user/index">{{request.session.account}}</a>
-    {% else %}
-    <a href="/user/login">登录</a>
-    {% endif %}
+<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand">C语言学习系统</a>
+        </div>
+        <ul class="nav navbar-nav">
+            <li><a href="/notice/index">公告</a></li>
+            <li><a href="/courseware/index">课件资源</a></li>
+            <li><a href="/mission/index">作业</a></li>
+            <li><a href="/practice/problems_list">练习</a></li>
+            <li class="dropdown">
+                <a class="dropdown-toggle" data-toggle="dropdown">
+                    工具<b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a href="/tool/online_run">在线编译</a></li>
+                    <li class="dropdown-submenu" role="menu">
+                        <a data-toggle="dropdown">IDE下载</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/resources/tools/CodeBlocks.rar">CodeBlocks</a></li>
+                            <li><a href="/resources/tools/VC_6_0.rar">VC 6.0</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li><a href="/comment/index">留言</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+            <li>
+                {% if request.session.account %}
+                <a href="/user/index">{{request.session.account}}</a>
+                {% else %}
+                <a href="/user/login">登录</a>
+                {% endif %}
+            </li>
+        </ul>
+    </div>
 </nav>

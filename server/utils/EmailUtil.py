@@ -1,6 +1,6 @@
 from django.core.mail import send_mail, send_mass_mail
-from apps.record.models import CertificationSentRecord, EmailSentRecord, VerifyCodeSentRecord
-from apps.course.models import Notice
+from record.models import CertificationSentRecord, EmailSentRecord, VerifyCodeSentRecord
+from notice.models import Notice
 from django.template import loader
 from server.settings import DEFAULT_FROM_EMAIL, SERVER_HOST
 from utils.manager import Manager
@@ -85,7 +85,7 @@ class EmailUtil(Manager):
                 params={"notice": notice[0]}
             )
             email_sender = DEFAULT_FROM_EMAIL
-            ret = send_mass_mail(
+            ret = send_mail(
                 subject=title,
                 from_email=email_sender,
                 message='',

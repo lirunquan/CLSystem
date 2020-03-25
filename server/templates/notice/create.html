@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block js %}
+<script src="https://cdn.bootcss.com/moment.js/2.18.1/moment-with-locales.min.js"></script>
+<script src="https://cdn.bootcss.com/wangEditor/10.0.13/wangEditor.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
+<link href="https://cdn.bootcss.com/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <label>创建公告</label>
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="form-inline">
+                <label>标题:</label>
+                &nbsp;
+                <input type="text" name="title" class="form-control">
+            </div>
+            <br>
+            <label>内容:</label>
+            <div id="editor"></div>
+            <br>
+            <div class="form-inline">
+                <label>发布时间:</label>
+                &nbsp;
+                <input type="text" name="announce_at" id="announce" class="form-control">
+            </div>
+            <br>
+            <div class="form-inline">
+                <button type="button" class="btn btn-default" onclick="add_appendix()">添加附件</button>
+                <button type="button" class="btn btn-danger" onclick="rm_appendix()" disabled>去掉附件</button>
+            </div>
+            <br>
+            <div id="appendix" class="form-group"></div>
+            <br>
+            <div class="form-check">
+                <label class="form-check-label">
+                    <input type="checkbox" class="form-check-input" name="email_alert" required>  发送邮件提醒
+                </label>
+            </div>
+            <br>
+            <div id="warnAlert" class="alert alert-warning hide">
+                <strong>请将内容填写完整</strong>
+            </div>
+            <div id="failedAlert" class="alert alert-danger hide">
+                <strong>操作失败!</strong>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="submit()">提交</button>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $("#announce").datetimepicker({
+        format: 'YYYY-MM-DD HH:mm:ss',
+        locale: moment.locale('zh-CN'),
+        showClear: true,
+        defaultDate: '{{ default_time }}'
+    });
+    var E = window.wangEditor;
+    var editor = new E("#editor");
+    editor.customConfig.menus = [
+        'head',
+        'bold',
+        'fontSize',
+        'fontName',
+        'italic',
+        'underline',
+        'strikeThrough',
+        'foreColor',
+        'backColor',
+        'link',
+        'list',
+        'justify',
+        'quote',
+        'table',
+        'code',
+        'undo',
+        'redo'
+    ];
+    editor.customConfig.zIndex = 10;
+    editor.create();
+    var apd_num = 0;
+    function add_appendix() {
+        apd_num ++;
+        var input = "<input type='file' id='file_" + apd_num.toString() +"' class='form-control'>";
+        $("#appendix").append(input);
+        if (apd_num > 0) {
+            $("button.btn-danger").attr("disabled", false);
+        }
+    }
+    function rm_appendix() {
+        var element = document.getElementById('file_' + apd_num.toString());
+        document.getElementById('appendix').removeChild(element);
+        apd_num --;
+        if (apd_num <= 0) {
+            $("button.btn-danger").attr("disabled", true);
+        }
+    }
+    function submit() {
+        var title = $("input[name='title']").val();
+        var content = editor.txt.html().replace(/\n/g,"<br/>");
+        var announce = $("#announce").val();
+        var ready = true;
+        for (var i = 0; i < $("input[type='file']").length; i++) {
+            if ($("input[type='file']")[i].files[0] == null) {
+                ready = false;
+                break;
+            }
+        }
+        if ((title == '') || (editor.txt.text() == '') || (announce == '')) {
+            ready = false;
+        }
+        if (ready) {
+            var formdata = new FormData();
+            formdata.append("title", title);
+            formdata.append("content", content);
+            formdata.append("announce_at", announce);
+            formdata.append("appendix", apd_num);
+            for (var i = 0; i < $("input[type='file']").length; i++) {
+                formdata.append("file_" + i.toString(), $("input[type='file']")[i].files[0]);
+            }
+            formdata.append("email_alert", $("input[name='email_alert']").is(":checked"));
+            var token = $.cookie('csrftoken');
+            $.ajax({
+                url: "/notice/create",
+                type: "POST",
+                headers:{'X-CSRFToken': token},
+                processData: false,
+                contentType: false,
+                data: formdata,
+                success: function (data) {
+                    if (data.msg == 'done') {
+                        window.location = '/notice/index';
+                    }
+                    else {
+                        $("#failedAlert").removeClass("hide").addClass("in");
+                    }
+                }
+            });
+        }
+        else {
+            $("#warnAlert").removeClass("hide").addClass("in");
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block js %}
+<script src="https://cdn.bootcss.com/moment.js/2.18.1/moment-with-locales.min.js"></script>
+<script src="https://cdn.bootcss.com/wangEditor/10.0.13/wangEditor.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
+<link href="https://cdn.bootcss.com/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+
+{% endblock %}
+
+{% block content %}
+{% if request.session.identity == '1' %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <label>创建作业</label>
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <label>标题:</label>
+            <input type="text" name="title" class="form-control" required>
+            <br>
+            <label>内容:</label>
+            <div id="editor"></div>
+            <br>
+            <div class="form-inline">
+                <label>起始时间:</label>
+                <input type="text" name="start_at" class="form-control" id="start" required>
+            </div>
+            <br>
+            <div class="form-inline">
+                <label>截止时间:</label>
+                <input type="text" name="end_at" class="form-control" id="end" required>
+            </div>
+            <br>
+            <div id="warnAlert" class="alert alert-warning hide">
+                <button type="button" class="close" onclick="$('#warnAlert').removeClass('in').addClass('hide')" 
+                    aria-hidden="true">
+                    &times;
+                </button>
+                <strong>请将内容填写完整</strong>
+            </div>
+            <div id="failedAlert" class="alert alert-danger hide">
+                <button type="button" class="close" onclick="$('#failedAlert').removeClass('in').addClass('hide')" 
+                    aria-hidden="true">
+                    &times;
+                </button>
+                <strong>操作失败!</strong>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="submit()">提交</button>
+        </div>
+        
+    </div>
+</div>
+<script type="text/javascript">
+    $("#start").datetimepicker({
+        format: 'YYYY-MM-DD HH:mm:ss',
+        locale: moment.locale('zh-CN'),
+        showClear: true,
+        defaultDate: '{{ start }}'
+    });
+    $("#end").datetimepicker({
+        format: 'YYYY-MM-DD HH:mm:ss',
+        locale: moment.locale('zh-CN'),
+        showClear: true,
+        defaultDate: '{{ end }}'
+    });
+    var E = window.wangEditor;
+    var editor = new E("#editor");
+    editor.customConfig.menus = [
+        'head',
+        'bold',
+        'fontSize',
+        'fontName',
+        'italic',
+        'underline',
+        'strikeThrough',
+        'foreColor',
+        'backColor',
+        'link',
+        'list',
+        'justify',
+        'quote',
+        'table',
+        'code',
+        'undo',
+        'redo'
+    ];
+    editor.customConfig.zIndex = 10;
+    editor.create();
+
+    function submit() {
+        var title = $("input[name='title']").val();
+        var start = $("#start").val();
+        var end = $("#end").val();
+        if ((title == '') || (editor.txt.text() == '') || (start == '') || (end == '')) {
+            $("#warnAlert").removeClass("hide").addClass("in");
+        }
+        else {
+            var content = editor.txt.html().replace(/\n/g,"<br/>");
+            var formdata = new FormData();
+            formdata.append("title", title);
+            formdata.append("content", content);
+            formdata.append("start_at", start);
+            formdata.append("end_at", end);
+            var token = $.cookie('csrftoken');
+            $.ajax({
+                url: "/mission/create",
+                type: "POST",
+                headers:{'X-CSRFToken': token},
+                processData: false,
+                contentType: false,
+                data: formdata,
+                success: function (data) {
+                    if (data.msg == 'done') {
+                        window.location = '/mission/index';
+                    }
+                    else {
+                        $("#failedAlert").removeClass("hide").addClass("in");
+                    }
+                }
+            })
+        }
+    }
+</script>
+{% elif request.session.identity == '2' %}
+<div class="alert alert-warning">
+    <p>
+        <strong>警告:</strong>
+        你未获取操作本页面的权限
+    </p>
+    <a href="javascript:history.go(-1)">返回</a>
+</div>
+{% else %}
+<div class="alert alert-warning">
+    <label>请先</label>
+    <a href="/user/login">登录</a>
+</div>
+{% endif %}
+{% endblock %}

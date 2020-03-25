@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+{% block js %}
+<script src="https://cdn.bootcss.com/moment.js/2.18.1/moment-with-locales.min.js"></script>
+<script src="https://cdn.bootcss.com/wangEditor/10.0.13/wangEditor.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
+<link href="https://cdn.bootcss.com/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+{% endblock %}
+{% block content %}
+{% if request.session.identity == '2' %}
+{% if committed %}
+<div id="successAlert" class="alert alert-success">
+    <button type="button" class="close" onclick="$('#successAlert').removeClass('in').addClass('hide')" aria-hidden="true">
+        &times;
+    </button>
+    <strong>已提交!</strong>
+</div>
+{% endif %}
+{% if overtime %}
+<div id="failedAlert" class="alert alert-danger">
+    <button type="button" class="close" onclick="$('#failedAlert').removeClass('in').addClass('hide')" 
+        aria-hidden="true">
+        &times;
+    </button>
+    <strong>已超时!</strong>
+</div>
+{% endif %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <label>{{ mission.title }}</label>
+        <label style="float: right;">{{ mission.end_at|date:"Y-m-d H:i" }}</label>
+        <label style="float: right;">{{ mission.start_at|date:"Y-m-d H:i" }}&nbsp;～&nbsp;</label>
+    </div>
+    <div class="panel-body">
+        <p>截止时间: 
+            <strong class="text-danger">{{ mission.end_at|date:"Y-m-d H:i" }}</strong>
+        </p>
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="content"></div>
+            </div>
+        </div>
+        <button id="btn_submit" type="button" class="btn btn-primary" data-toggle="modal" data-target="#submit_modal">提交</button>
+        <div class="modal fade" id="submit_modal" tabindex="-1" role="dialog" arial-labelledby="t_label" arial-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" arial-hidden="true">
+                            &times;
+                        </button>
+                        <h4 class="modal-title" id="t_label">
+                            提交作业
+                        </h4>
+                    </div>
+                    <form class="modal-body" method="post" action="/mission/{{ mission.id }}/commit" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <p>请上传对应的压缩文件, 以"学号+姓名"命名该文件,勿在文 件名中添加特殊字符.</p>
+                        <input class="form-control" type="file" name="zip_file" accept=".rar,.zip" required>
+                        <br>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="glyphicon glyphicon-ok"></span> 确定
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    if ("{{ overtime }}" == "True") {
+        $("#btn_submit").attr("disabled", true);
+    }
+    function htmlDecode(text) {
+        var temp = document.createElement("div");
+        temp.innerHTML = text;
+        var output = temp.innerText || temp.textContent;
+        temp = null;
+        return output;
+    }
+    $("#content").append(htmlDecode("{{ mission.content }}"));
+</script>
+{% elif request.session.identity == '1' %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <button type="button" class="btn btn-default" onclick="set_change()">修改</button>
+        <button type="button" id="btn_remove" class="btn btn-danger" style="float: right;" onclick="remove()" disabled>
+            <span class="glyphicon glyphicon-trash"></span> 删除
+        </button>
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <label>标题:</label>
+            <input type="text" name="title" class="form-control" value="{{ mission.title }}" readonly required>
+            <br>
+            <label>内容:</label>
+            <div id="editor"></div>
+            <br>
+            <div class="form-inline">
+                <label>起始时间:</label>
+                <input type="text" name="start_at" class="form-control" id="start" readonly required>
+            </div>
+            <br>
+            <div class="form-inline">
+                <label>截止时间:</label>
+                <input type="text" name="end_at" class="form-control" id="end" required readonly>
+            </div>
+            <br>
+            <div id="warnAlert" class="alert alert-warning hide">
+                <button type="button" class="close" onclick="$('#warnAlert').removeClass('in').addClass('hide')" 
+                    aria-hidden="true">
+                    &times;
+                </button>
+                <strong>请将内容填写完整</strong>
+            </div>
+            <div id="failedAlert" class="alert alert-danger hide">
+                <button type="button" class="close" onclick="$('#failedAlert').removeClass('in').addClass('hide')" 
+                    aria-hidden="true">
+                    &times;
+                </button>
+                <strong>操作失败!</strong>
+            </div>
+            <button id="btn_submit" type="button" class="btn btn-primary" onclick="submit()" disabled>提交</button>
+            <button id="btn_cancel" type="button" class="btn btn-default" onclick="cancel()" disabled>取消</button>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $("#start").datetimepicker({
+        format: 'YYYY-MM-DD HH:mm:ss',
+        locale: moment.locale('zh-CN'),
+        showClear: true,
+        defaultDate: '{{ mission.start_at|date:"Y-m-d H:i" }}'
+    });
+    $("#end").datetimepicker({
+        format: 'YYYY-MM-DD HH:mm:ss',
+        locale: moment.locale('zh-CN'),
+        showClear: true,
+        defaultDate: '{{ mission.end_at|date:"Y-m-d H:i" }}'
+    });
+    var E = window.wangEditor;
+    var editor = new E("#editor");
+    editor.customConfig.menus = [
+        'head',
+        'bold',
+        'fontSize',
+        'fontName',
+        'italic',
+        'underline',
+        'strikeThrough',
+        'foreColor',
+        'backColor',
+        'link',
+        'list',
+        'justify',
+        'quote',
+        'table',
+        'code',
+        'undo',
+        'redo'
+    ];
+    editor.customConfig.zIndex = 10;
+    editor.create();
+    editor.txt.html(htmlDecode("{{ mission.content }}"));
+    editor.$textElem.attr("contenteditable", false);
+    function htmlDecode(text) {
+        var temp = document.createElement("div");
+        temp.innerHTML = text;
+        var output = temp.innerText || temp.textContent;
+        temp = null;
+        return output;
+    }
+    function set_change() {
+        editor.$textElem.attr("contenteditable", true);
+        $("input").removeAttr("readonly");
+        $("#btn_submit").attr("disabled", false);
+        $("#btn_cancel").attr("disabled", false);
+        $("#btn_remove").attr("disabled", false);
+    }
+    function remove() {
+        var token = $.cookie('csrftoken');
+        var formdata = new FormData();
+        formdata.append("operation", "remove");
+        $.ajax({
+            type: "POST",
+            url: "/mission/{{ mission.id }}/modify",
+            headers:{'X-CSRFToken': token},
+            processData: false,
+            contentType: false,
+            data: formdata,
+            success: function (data) {
+                if (data.msg == "done") {
+                    window.location = "/mission/index";
+                }
+                else {
+                    $("#failedAlert").removeClass("hide").addClass("in");
+                }
+            }
+        });
+    }
+    function submit() {
+        var title = $("input[name='title']").val();
+        var start = $("#start").val();
+        var end = $("#end").val();
+        if ((title == '') || (editor.txt.text() == '') || (start == '') || (end == '')) {
+            $("#warnAlert").removeClass("hide").addClass("in");
+        }
+        else{
+            var token = $.cookie('csrftoken');
+            var formdata = new FormData();
+            var content = editor.txt.html().replace(/\n/g, "<br/>");
+            formdata.append("title", title);
+            formdata.append("content", content);
+            formdata.append("start_at", start);
+            formdata.append("end_at", end);
+            $.ajax({
+                type: "POST",
+                url: "/mission/{{ mission.id }}/modify",
+                headers:{'X-CSRFToken': token},
+                processData: false,
+                contentType: false,
+                data: formdata,
+                success: function (data) {
+                    if (data.msg == "done") {
+                        window.location.reload();
+                    }
+                    else {
+                        $("#failedAlert").removeClass("hide").addClass("in");
+                    }
+                }
+            });
+        }
+    }
+    function cancel() {
+        window.location.reload();
+    }
+</script>
+{% endif %}
+{% endblock %}

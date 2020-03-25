@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if len == 0 %}
+<div class="panel panel-default">
+    <div class="panel-body">
+        <p class="text-center">暂无内容</p>
+        {% if request.session.identity == '1' %}
+        <p class="text-center text-info">
+            <a href="/mission/create">添加作业</a>
+        </p>
+        {% endif %}
+    </div>
+</div>
+{% else %}
+<div class="panel panel-default">
+    {% if request.session.identity == '1' %}
+    <div class="panel-heading">
+        <a href="/mission/create">添加作业</a>
+    </div>
+    {% endif %}
+    <div class="panel-body">
+        <div class="list-group">
+            {% for m in mission_page %}
+            <div class="list-group-item">
+                <a href="/mission/{{ m.id }}/detail" class="text-left">{{ m.title }}</a>
+                &nbsp;
+                <small>起始时间: {{ m.start_at|date:"Y-m-d H:i" }}</small>
+                &nbsp;
+                <small>截止时间: {{ m.end_at|date:"Y-m-d H:i" }}</small>
+                <a style="float: right;" href="/mission/check/{{ m.id }}">查看提交</a>
+            </div>
+            {% endfor %}
+        </div>
+        <div id="page" class="text-center">
+            <ul class="pagination">
+                <li>
+                    {% if mission_page.has_previous %}
+                    <a href="?page={{ mission_page.previous_page_number }}">&laquo;</a>
+                    {% endif %}
+                </li>
+                {% for i in mission_page.paginator.page_range %}
+                {% if i == mission_page.number %}
+                <li class="current">
+                    <a href="?page={{ mission_page.number }}">{{ i }}</a>
+                </li>
+                {% else %}
+                <li><a href="?page={{ i }}">{{ i }}</a></li>
+                {% endif %}
+                {% endfor %}
+                <li>
+                    {% if mission_page.has_next %}
+                    <a href="?page={{ mission_page.next_page_number }}">&raquo;</a>
+                    {% endif %}
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

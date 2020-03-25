@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div id="failAlert" class="alert alert-danger hide">
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <button type="button" class="btn btn-default" onclick="set_change()">修改</button>
+        <button type="button" id="btn_remove" class="btn btn-danger" style="float: right;" onclick="remove()" disabled>
+            <span class="glyphicon glyphicon-trash"></span> 删除
+        </button>
+    </div>
+    <div class="panel-body">
+        <form method="post" action="/courseware/{{ courseware.id }}/modify" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                <div class="form-inline">
+                    <label>序号:</label>
+                    &nbsp;
+                    <input type="number" name="ordinal" value="{{ courseware.ordinal }}" class="form-control" readonly required>
+                </div>
+                <br>
+                <div class="form-inline">
+                    <label>标题:</label>
+                    &nbsp;
+                    <input type="text" name="title" value="{{ courseware.title }}" class="form-control" readonly required>
+                </div>
+                <br>
+                <div class="form-inline">
+                    <label>文件类型:</label>
+                    &nbsp;
+                    <select class="form-control" name="file_type" required onchange="change_accept(this.options[this.options.selectedIndex].value)" disabled>
+                        <option value="0">请选择</option>
+                        <option value="1">PPT</option>
+                        <option value="2">Video</option>
+                        <option value="3">PDF</option>
+                    </select>
+                    &nbsp;
+                    <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="right" title="改变文件类型后需要上传对应的文件"></span>
+                </div>
+                <br>
+                <div class="form-inline">
+                    <label>文件:</label>
+                    &nbsp;
+                    <input id="cw" class="form-control" type="file" name="cw_file" disabled readonly>
+                </div>
+                <br>
+                
+                <button id="btn_submit" type="submit" class="btn btn-primary" disabled>提交</button>
+                <button id="btn_cancel" type="button" class="btn btn-default" disabled onclick="cancel()">取消</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script type="text/javascript">
+    var f_type = '{{ courseware.file_type }}';
+    $("select").find("option[value='" + f_type + "']").attr("selected", true);
+    function change_accept(value) {
+        if (value == '0') {
+            $("#cw").attr("disabled", true);
+        }
+        if (value == '1') {
+            $("#cw").attr("accept", ".ppt,.pptx");
+        }
+        if (value == '2') {
+            $("#cw").attr("accept", ".mp4");
+        }
+        if (value == '3') {
+            $("#cw").attr("accept", ".pdf");
+        }
+        if (value != '0') {
+            $("#cw").attr("disabled", false);
+        }
+    }
+    function set_change() {
+        $("input").removeAttr("readonly");
+        $("select").attr("disabled", false);
+        $("#btn_submit").attr("disabled", false);
+        $("#btn_remove").attr("disabled", false);
+        $("#btn_cancel").attr("disabled", false);
+        $("input[type='file']").attr("disabled", false);
+    }
+    function cancel() {
+        $("input").attr("readonly", "readonly");
+        $("select").attr("disabled", true);
+        $("#btn_submit").attr("disabled", true);
+        $("#btn_remove").attr("disabled", true);
+        $("#btn_cancel").attr("disabled", true);
+        $("input[type='file']").attr("disabled", true);
+    }
+    
+    function remove() {
+        var formdata = new FormData();
+        var token = $.cookie('csrftoken');
+        formdata.append("operation", "remove");
+        $.ajax({
+            url: '/courseware/{{ courseware.id }}/modify',
+            type: 'post',
+            headers:{'X-CSRFToken': token},
+            processData: false,
+            contentType: false,
+            data: formdata,
+            success: function (data) {
+                if (data.msg == "done") {
+                    window.location = '/courseware/index';
+                }
+                else {
+                    $("failAlert").append("<p>删除失败</p>");
+                    $("failAlert").removeClass("hide").addClass("in");
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

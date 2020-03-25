@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if request.session.identity == '1' %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <label>创建课件</label>
+    </div>
+    <div class="panel-body">
+        <form class="form-group" method="post" action="/courseware/create" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-inline">
+                <label>序号:</label>
+                &nbsp;
+                <input class="form-control" type="number" name="ordinal" value="{{ ordinal }}" required>
+            </div>
+            <br>
+            <div class="form-inline">
+                <label>标题:</label>
+                &nbsp;
+                <input type="text" name="title" class="form-control" required>
+            </div>
+            <br>
+            <div class="form-inline">
+                <label>文件类型:</label>
+                &nbsp;
+                <select class="form-control" name="file_type" required onchange="change_accept(this.options[this.options.selectedIndex].value)">
+                    <option value="0">请选择</option>
+                    <option value="1">PPT</option>
+                    <option value="2">Video</option>
+                    <option value="3">PDF</option>
+                </select>
+            </div>
+            <br>
+            <div class="form-inline">
+                <label>文件:</label>
+                &nbsp;
+                <input id="cw" class="form-control" type="file" name="cw_file" required disabled>
+            </div>
+            <br>
+            <button class="btn btn-primary" type="submit" disabled>提交</button>
+        </form>
+    </div>
+</div>
+<script type="text/javascript">
+    function change_accept(value) {
+        if (value == '0') {
+            $("#cw").attr("disabled", true);
+            $("button").attr("disabled", true);
+        }
+        if (value == '1') {
+            $("#cw").attr("accept", ".ppt,.pptx");
+        }
+        if (value == '2') {
+            $("#cw").attr("accept", ".mp4");
+        }
+        if (value == '3') {
+            $("#cw").attr("accept", ".pdf");
+        }
+        if (value != '0') {
+            $("#cw").attr("disabled", false);
+            $("button").attr("disabled", false);
+        }
+    }
+</script>
+{% elif request.session.identity == '2' %}
+<div class="alert alert-warning">
+    <p>
+        <strong>警告:</strong>
+        你未获取操作本页面的权限
+    </p>
+    <a href="javascript:history.go(-1)">返回</a>
+</div>
+{% else %}
+<div class="alert alert-warning">
+    <label>请先</label>
+    <a href="/user/login">登录</a>
+</div>
+{% endif %}
+{% endblock %}

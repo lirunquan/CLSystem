@@ -1,0 +1,273 @@
+{% extends 'base.html' %}
+{% block js %}
+<script src="https://cdn.bootcss.com/moment.js/2.18.1/moment-with-locales.min.js"></script>
+<script src="https://cdn.bootcss.com/wangEditor/10.0.13/wangEditor.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
+<link href="https://cdn.bootcss.com/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+{% endblock %}
+{% block content %}
+{% if request.session.identity == '1' %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <button type="button" class="btn btn-default" onclick="set_change()">修改</button>
+        <button type="button" id="btn_remove" class="btn btn-danger" style="float: right;" onclick="remove()" disabled>
+            <span class="glyphicon glyphicon-trash"></span> 删除
+        </button>
+    </div>
+    <div class="panel-body">
+        <div class="form-inline">
+            <label>标题:</label>
+            &nbsp;
+            <input type="text" name="title" required readonly value="{{ notice.title }}" class="form-control">
+        </div>
+        <br>
+        <label>内容:</label>
+        <div id="editor"></div>
+        <br>
+        <div class="form-inline">
+            <label>附件:</label>
+            &nbsp;&nbsp;
+            <button id="btn_add" class="btn btn-default" onclick="add_appendix()" disabled>添加附件</button>
+            &nbsp;
+            <button id="btn_clear" class="btn btn-danger" onclick="clear_appendix()" disabled>清空附件</button>
+        </div>
+        <div id="apd_panel" class="panel panel-default">
+            <div id="appendix" class="panel-body form-group"></div>
+        </div>
+        <br>
+        <div class="form-inline">
+            <label>公布时间:</label>
+            &nbsp;
+            <input type="text" name="announce_at" id="anc" class="form-control" readonly>
+            &nbsp;
+        </div>
+        <br>
+        <div class="form-check">
+            <label class="form-check-label">
+                <input type="checkbox" class="form-check-input" name="email_alert" required disabled>  发送邮件提醒
+            </label>
+        </div>
+        <br>
+        <div id="failedAlert" class="alert alert-danger hide">
+            <button type="button" class="close" onclick="$('#failedAlert').removeClass('in').addClass('hide')" 
+                aria-hidden="true">
+                &times;
+            </button>
+            <strong>操作失败!</strong>
+        </div>
+        <div id="warnAlert" class="alert alert-warning hide">
+            <button type="button" class="close" onclick="$('#warnAlert').removeClass('in').addClass('hide')" 
+                aria-hidden="true">
+                &times;
+            </button>
+            <strong>请将内容补充完整</strong>
+        </div>
+        <button class="btn btn-primary" onclick="submit()" disabled>提交</button>
+        <button class="btn btn-default" onclick="window.location.reload()" disabled>取消</button>
+    </div>
+</div>
+<script type="text/javascript">
+    var num = 0;
+    var formdata = new FormData();
+    {% if not notice.with_appendix %}
+    $("#apd_panel").addClass("hide")
+    {% endif %}
+    {% if notice.email_alert %}
+    $("input[type='checkbox']").attr("checked", true);
+    {% endif %}
+    {% for file in notice.appendix.file_list %}
+    $("#appendix").append("<a href='/notice/{{ notice.id }}/appendix?apd=" + num +"'>{{ file.filename }}</a><br>");
+    num ++;
+    {% endfor %}
+    $("#anc").datetimepicker({
+        format: 'YYYY-MM-DD HH:mm:ss',
+        locale: moment.locale('zh-CN'),
+        showClear: true,
+        defaultDate: '{{ notice.announce_at|date:"Y-m-d H:i:s" }}'
+    });
+    function htmlDecode(text) {
+        var temp = document.createElement("div");
+        temp.innerHTML = text;
+        var output = temp.innerText || temp.textContent;
+        temp = null;
+        return output;
+    }
+    var E = window.wangEditor;
+    var editor = new E("#editor");
+    editor.customConfig.menus = [
+        'head',
+        'bold',
+        'fontSize',
+        'fontName',
+        'italic',
+        'underline',
+        'strikeThrough',
+        'foreColor',
+        'backColor',
+        'link',
+        'list',
+        'justify',
+        'quote',
+        'table',
+        'code',
+        'undo',
+        'redo'
+    ];
+    editor.customConfig.zIndex = 10;
+    editor.create();
+    editor.txt.html(htmlDecode("{{ notice.content }}"));
+    editor.$textElem.attr("contenteditable", false);
+    function set_change() {
+        $("input[type='checkbox']").attr("disabled", false);
+        $("input[type='text']").removeAttr("readonly");
+        $("#anc").removeAttr("readonly")
+        $("button").attr("disabled", false);
+        {% if not notice.with_appendix %}
+        $("#btn_clear").attr("disabled", true);
+        {% endif %}
+        editor.$textElem.attr("contenteditable", true);
+    }
+    function remove() {
+        var token = $.cookie('csrftoken');
+        var fd = new FormData();
+        fd.append("operation", "remove");
+        $.ajax({
+            type: "POST",
+            url: "/notice/{{ notice.id }}/modify",
+            headers:{'X-CSRFToken': token},
+            processData: false,
+            contentType: false,
+            data: fd,
+            success: function (data) {
+                if (data.msg == "done") {
+                    window.location = "/notice/index";
+                }
+                else {
+                    $("#failedAlert").removeClass("hide").addClass("in");
+                }
+            }
+        });
+    }
+    var num_add = 0;
+    function add_appendix() {
+        $("#btn_clear").attr("disabled", false);
+        $("#apd_panel").removeClass("hide");
+        $("#appendix").append("<input type='file' name='file_"+ num +"' class='form-control'>");
+        num ++;
+        num_add ++;
+    }
+    function clear_appendix() {
+        num = 0;
+        var token = $.cookie('csrftoken');
+        var fd = new FormData();
+        fd.append("operation", "clear_appendix");
+        $.ajax({
+            type: "POST",
+            url: "/notice/{{ notice.id }}/modify",
+            headers:{'X-CSRFToken': token},
+            processData: false,
+            contentType: false,
+            data: fd,
+            success: function (data) {
+                if (data.msg == "done") {
+                    window.location.reload();
+                }
+                else {
+                    $("#failedAlert").removeClass("hide").addClass("in");
+                }
+            }
+        });
+    }
+    function submit() {
+        var title = $("input[name='title']").val();
+        var content = editor.txt.html().replace(/\n/g,"<br/>");
+        var announce = $("#anc").val();
+        var ready = true;
+        for (var i = 0; i < $("input[type='file']").length; i++) {
+            if ($("input[type='file']")[i].files[0] == null) {
+                ready = false;
+                break;
+            }
+        }
+        if ((title == '') || (editor.txt.text() == '') || (announce == '')) {
+            ready = false;
+        }
+        if (ready) {
+            if (num_add > 0) {
+                formdata.append("operation", "add_appendix");
+            }
+            formdata.append("title", title);
+            formdata.append("content", content);
+            formdata.append("announce_at", announce);
+            formdata.append("appendix", num);
+            for (var i = 0; i < $("input[type='file']").length; i++) {
+                formdata.append("file_" + i.toString(), $("input[type='file']")[i].files[0]);
+            }
+            formdata.append("email_alert", $("input[name='email_alert']").is(":checked"));
+            var token = $.cookie('csrftoken');
+            $.ajax({
+                type: "POST",
+                url: "/notice/{{ notice.id }}/modify",
+                headers:{'X-CSRFToken': token},
+                processData: false,
+                contentType: false,
+                data: formdata,
+                success: function (data) {
+                    if (data.msg == "done") {
+                        window.location.reload();
+                    }
+                    else {
+                        $("#failedAlert").removeClass("hide").addClass("in");
+                    }
+                }
+            });
+        }
+        else {
+            $("#warnAlert").removeClass("hide").addClass("in");
+        }
+    }
+</script>
+{% elif request.session.identity == '2' %}
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="form-group">
+            <h4 class="text-center">{{ notice.title }}</h4>
+            <p class="text-right text-muted">发布于{{ notice.announce_at|date:"Y-m-d H:i" }}</p>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div id="content"></div>
+                </div>
+            </div>
+            <div id="apd_panel" class="panel panel-default">
+                <div class="panel-body">
+                    <p>附件:</p>
+                    <div id="appendix"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function htmlDecode(text) {
+        var temp = document.createElement("div");
+        temp.innerHTML = text;
+        var output = temp.innerText || temp.textContent;
+        temp = null;
+        return output;
+    }
+    $("#content").append(htmlDecode("{{ notice.content }}"));
+    var num = 0;
+    {% if not notice.with_appendix %}
+    $("#apd_panel").addClass("hide")
+    {% endif %}
+    {% for file in notice.appendix.file_list %}
+    $("#appendix").append("<a href='/notice/{{ notice.id }}/appendix?apd=" + num +"'>" + "附件" + (num + 1) +": {{ file.filename }}</a><br>");
+    num ++;
+    {% endfor %}
+</script>
+{% else %}
+<script type="text/javascript">
+    window.location = '/user/login';
+</script>
+{% endif %}
+{% endblock %}

@@ -1,12 +1,32 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h3>Certificate Email</h3>
+<h3>认证邮箱</h3>
 <p>请输入常用邮箱，将发送认证邮件以认证邮箱</p>
+{% if message == 'done' %}
+<div id="successAlert" class="alert alert-success in">
+    <button type="button" class="close" onclick="$('#successAlert').addClass('hide')" aria-hidden="true">
+        &times;
+    </button>
+    <strong>认证邮件已发送!</strong>
+</div>
+{% elif message == 'failed' %}
+<div id="failedAlert" class="alert alert-success in">
+    <button type="button" class="close" onclick="$('#failedAlert').addClass('hide')" aria-hidden="true">
+        &times;
+    </button>
+    <strong>邮件发送失败, 请重试!</strong>
+</div>
+{% endif %}
 <form action="/user/email/certificate" method="post">
-    邮箱: <input type="email" name="email" required>
-    <input type="submit" value="发送">
+    <div class="form-inline">
+        邮箱: <input class="form-control" type="email" name="email" required>
+    </div>
+    <br>
+    <button type="submit" class="btn btn-primary">发送</button>
+    <button type="button" class="btn btn-default" onclick="window.location='/user/index'">取消</button>
     {% csrf_token %}
 </form>
-<h6>{{ message }}</h6>
+<br>
+
 {% endblock %}
