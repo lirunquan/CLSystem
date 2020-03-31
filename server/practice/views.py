@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect, HttpResponse
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage, InvalidPage
-from django.http import FileResponse, JsonResponse
+from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from .models import Programme, Choice
-from record.models import CommitCodeRecord, CommitChoiceRecord
+from record.models import CommitCodeRecord
 from server.settings import RESOURCES_DIR
 from utils.FileUtil import *
 from utils.JudgerUtil import JudgerUtil
@@ -122,11 +122,7 @@ def add_choice_batch(request):
 @require_http_methods(['GET'])
 def download_template(request):
     choice_temp_path = os.path.join(RESOURCES_DIR, 'choices', 'template.xls')
-    f = open(choice_temp_path, 'rb')
-    response = FileResponse(f)
-    response["Content-Type"] = 'application/octet-stream'
-    response['Content-Disposition'] = 'attachment;filename="Template.xls"'
-    return response
+    return download_response(choice_temp_path)
 
 
 def get_data(obj_list, page):
@@ -224,13 +220,6 @@ def choice_commit(request, c_id):
     answer = data["answer"]
     choice = Choice.objects.get(id=c_id)
     reference = choice.reference
-    record = CommitChoiceRecord(
-        account=request.session.get("account"),
-        problem_id=c_id,
-        answer=answer,
-        correct=answer == reference
-    )
-    record.save()
     ret = {"correct": answer == reference}
     return JsonResponse(ret)
 
@@ -250,14 +239,16 @@ def check_commit(request):
         code = c.src_content
         compiled = c.compilesrcrecord
         judged = compiled.judgerecord
+        commit_times = c.commit_times
         r = get_result(compiled, judged)
         data_list.append(
             {
-                "id": c.id,
+                "id": c.problem_id,
                 "account": account,
                 "result": r,
                 "time": t,
                 "code": code,
+                "ts": commit_times,
                 "title": title
             }
         )
@@ -267,6 +258,7 @@ def check_commit(request):
             d for d in data_list if d["result"] == request.GET.get("result")
         ]
     data = get_data(new_list, page)
+    print(data.object_list)
     return render(
         request,
         'practice/check_commit.html',
@@ -354,11 +346,7 @@ def get_tc_zip(request, p_id):
             str(time.time()).replace('.', '') + '.zip'
         )
         make_zip(tc_dir, z)
-        f = open(z, 'rb')
-        response = FileResponse(f)
-        response["Content-Type"] = 'application/octet-stream'
-        response['Content-Disposition'] = 'attachment;filename="testcase.zip"'
-        return response
+        return download_response(z)
     return HttpResponse(status=404)
 
 
@@ -371,6 +359,7 @@ def save_tc_file(file_data, tc_dir):
     write_file(file_data, saved_path)
     make_dir(tc_dir)
     unzip_file(saved_path, tc_dir)
+    dos2unix_dir(tc_dir)
     remove_file(saved_path)
 
 

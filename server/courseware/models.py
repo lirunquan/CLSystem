@@ -5,9 +5,8 @@ from django.db import models
 
 COURSEWARE = (
     ('0', 'Other'),
-    ('1', 'PPT'),
-    ('2', 'Video'),
-    ('3', 'PDF'),
+    ('1', 'Video'),
+    ('2', 'PDF'),
 )
 
 

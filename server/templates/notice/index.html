@@ -24,7 +24,7 @@
             {% for n in notices %}
             <div class="list-group-item text-right" >
                 <a style="float: left;" href="/notice/{{ n.id }}/detail">{{ n.title }}</a>
-                <small>发布于 {{ n.announce_at|date:"Y-m-d H:i" }}</small>
+                <small>{{ n.update_at|date:"Y-m-d H:i" }}</small>
             </div>
             {% endfor %}
         </div>

@@ -4,7 +4,7 @@
 
 # Judger 
 - source
-    https://github.com/dojiong/Lo-runner.git
+    
 - installing 
     Ubuntu机器下执行
     ```shell

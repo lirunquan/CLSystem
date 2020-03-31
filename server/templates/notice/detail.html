@@ -35,17 +35,16 @@
             <div id="appendix" class="panel-body form-group"></div>
         </div>
         <br>
-        <div class="form-inline">
-            <label>公布时间:</label>
-            &nbsp;
-            <input type="text" name="announce_at" id="anc" class="form-control" readonly>
-            &nbsp;
-        </div>
-        <br>
         <div class="form-check">
             <label class="form-check-label">
                 <input type="checkbox" class="form-check-input" name="email_alert" required disabled>  发送邮件提醒
             </label>
+        </div>
+        <div class="form-inline">
+            <label>发送邮件时间:</label>
+            &nbsp;
+            <input type="text" name="announce_at" id="anc" class="form-control" readonly>
+            &nbsp;
         </div>
         <br>
         <div id="failedAlert" class="alert alert-danger hide">
@@ -152,7 +151,7 @@
     function add_appendix() {
         $("#btn_clear").attr("disabled", false);
         $("#apd_panel").removeClass("hide");
-        $("#appendix").append("<input type='file' name='file_"+ num +"' class='form-control'>");
+        $("#appendix").append("<input type='file' name='file_"+ num_add +"' class='form-control'>");
         num ++;
         num_add ++;
     }
@@ -192,6 +191,12 @@
         if ((title == '') || (editor.txt.text() == '') || (announce == '')) {
             ready = false;
         }
+        var anc_date = new Date(Date.parse(announce));
+        var now = new Date();
+        if (anc_date < now) {
+            ready = false;
+            $("#warnAlert").append("<p>发送邮件时间请选择当前时间之后的时间</p>");
+        }
         if (ready) {
             if (num_add > 0) {
                 formdata.append("operation", "add_appendix");
@@ -199,7 +204,7 @@
             formdata.append("title", title);
             formdata.append("content", content);
             formdata.append("announce_at", announce);
-            formdata.append("appendix", num);
+            formdata.append("appendix", num_add);
             for (var i = 0; i < $("input[type='file']").length; i++) {
                 formdata.append("file_" + i.toString(), $("input[type='file']")[i].files[0]);
             }

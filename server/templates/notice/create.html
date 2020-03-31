@@ -24,12 +24,6 @@
             <div id="editor"></div>
             <br>
             <div class="form-inline">
-                <label>发布时间:</label>
-                &nbsp;
-                <input type="text" name="announce_at" id="announce" class="form-control">
-            </div>
-            <br>
-            <div class="form-inline">
                 <button type="button" class="btn btn-default" onclick="add_appendix()">添加附件</button>
                 <button type="button" class="btn btn-danger" onclick="rm_appendix()" disabled>去掉附件</button>
             </div>
@@ -40,6 +34,11 @@
                 <label class="form-check-label">
                     <input type="checkbox" class="form-check-input" name="email_alert" required>  发送邮件提醒
                 </label>
+            </div>
+            <div class="form-inline">
+                <label>发送邮件时间:</label>
+                &nbsp;
+                <input type="text" name="announce_at" id="announce" class="form-control">
             </div>
             <br>
             <div id="warnAlert" class="alert alert-warning hide">
@@ -57,7 +56,8 @@
         format: 'YYYY-MM-DD HH:mm:ss',
         locale: moment.locale('zh-CN'),
         showClear: true,
-        defaultDate: '{{ default_time }}'
+        defaultDate: '{{ default_time }}',
+        minDate: '{{ now|date:"Y-m-d H:i:s" }}'
     });
     var E = window.wangEditor;
     var editor = new E("#editor");

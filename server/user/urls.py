@@ -20,4 +20,5 @@ urlpatterns = [
     path('import/<int:identity>', views.import_user_save, name='saveUser'),
     path('template/student', views.download_student, name='stuTemp'),
     path('template/teacher', views.download_teacher, name='tecTemp'),
+    path('add_class', views.add_class),
 ]

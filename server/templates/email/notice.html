@@ -6,17 +6,9 @@
 <body>
     <h3>{{ notice.title }}</h3>
     <br>
-    <div id="content"></div>
+    <div id="content">
+        {{ notice.content }}
+    </div>
     
 </body>
-<script type="text/javascript">
-    function htmlDecode(text) {
-        var temp = document.createElement("div");
-        temp.innerHTML = text;
-        var output = temp.innerText || temp.textContent;
-        temp = null;
-        return output;
-    }
-    document.getElementById('content').innerHTML = htmlDecode("{{ notice.content }}");
-</script>
 </html>

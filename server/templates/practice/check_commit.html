@@ -48,13 +48,13 @@
                 </tr>
             </thead>
             <tbody>
-                {% for r in results %}
+                {% for r in results.object_list %}
                 {% if r.result == 'ACCEPT' %}
                 <tr class="success">
                 {% else %}
                 <tr class="danger"></tr>
                 {% endif %}
-                    <td>{{ r.title }}</td>
+                    <td>{{ r.id }}. {{ r.title }}</td>
                     <td>{{ r.account }}</td>
                     <td>{{ r.time }}</td>
                     {% if r.result == 'ACCEPT' %}
@@ -65,9 +65,9 @@
                         <strong>{{ r.result }}</strong>
                     </td>
                     <td>
-                        <button class="btn btn-link btn-xs" type="button" data-toggle="modal" data-target="#codeModal_{{ r.id }}">查看代码</button>
+                        <button class="btn btn-link btn-xs" type="button" data-toggle="modal" data-target="#codeModal_{{ r.id }}_{{ r.account }}_{{ r.ts }}">查看代码</button>
                     </td>
-                    <div class="modal fade" id="codeModal_{{ r.id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal fade" id="codeModal_{{ r.id }}_{{ r.account }}_{{ r.ts }}" tabindex="-1" role="dialog" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">

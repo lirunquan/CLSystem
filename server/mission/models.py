@@ -6,7 +6,10 @@ import datetime
 
 def end_time():
     td = datetime.date.today()
-    return td + datetime.timedelta(days=7)
+    nw = td + datetime.timedelta(days=7)
+    return datetime.datetime(
+        nw.year, nw.month, nw.day, 7, 0, 0
+    )
 
 
 class Mission(models.Model):
@@ -17,3 +20,4 @@ class Mission(models.Model):
     update_at = models.DateTimeField(auto_now=True)
     start_at = models.DateTimeField(default=timezone.now)
     end_at = models.DateTimeField(default=end_time)
+    to_class = models.CharField(max_length=255, default='')

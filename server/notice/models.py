@@ -6,7 +6,10 @@ import datetime
 
 def announce_time():
     td = datetime.date.today()
-    return td + datetime.timedelta(days=1)
+    next_day = td + datetime.timedelta(days=1)
+    return datetime.datetime(
+        next_day.year, next_day.month, next_day.day, 7, 0, 0
+    )
 
 
 def appendix():

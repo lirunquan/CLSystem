@@ -152,15 +152,5 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 SERVER_HOST = "http://192.168.2.112:10086"
 
-Q_CLUSTER = {
-    # 'workers': 4,
-    # 'queue_limit': 20,
-    'redis': {
-        'host': '127.0.0.1',
-        'port': 6379,
-        'db': 0,
-    }
-}
-
 MEDIA_URL = '/resources/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'resources')

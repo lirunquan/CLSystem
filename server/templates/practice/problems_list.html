@@ -6,6 +6,7 @@
         {% if request.session.identity == '1' %}
         <a href="/practice/programme/create">创建编程题</a>
         {% endif %}
+        <a href="/practice/check_commit" style="float: right;">查看所有提交</a>
     </div>
     {% if p_len == 0 %}
     <div class="panel-body text-center">

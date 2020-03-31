@@ -11,20 +11,12 @@ class Record(models.Model):
     time = models.DateTimeField(auto_now_add=True)
     success = models.BooleanField(default=True)
     ext = models.TextField(default='', blank=True)
-    operation = models.CharField()
 
     class Meta:
         abstract = True
 
 
-# record while user certificates email
-class EmailCertificationRecord(Record):
-    operation = models.CharField(default='certificate email', max_length=50, editable=False)
-    email = models.TextField(default='')
-
-
 class EmailSentRecord(Record):
-    operation = models.CharField(default='send email', max_length=20, editable=False)
     email_type = models.CharField(max_length=256)
     recipients = models.TextField(default='')
 
@@ -38,27 +30,11 @@ class VerifyCodeSentRecord(EmailSentRecord):
     code = models.CharField(max_length=20, default='')
 
 
-class CommitRecord(Record):
-    operation = models.CharField(default='commit', max_length=20, editable=False)
+class CommitCodeRecord(Record):
     problem_id = models.IntegerField(default=0)
-    problem_type = models.CharField(choices=PROBLEM_TYPE, default='0', max_length=2)
     commit_times = models.IntegerField(default=0)
-    ext = models.TextField(default='')
-
-    class Meta:
-        abstract = True
-
-
-class CommitCodeRecord(CommitRecord):
-    problem_type = models.CharField(choices=PROBLEM_TYPE, default='1', max_length=2)
     src_content = models.TextField(default='')
     src_saved_path = models.CharField(max_length=256)
-
-
-class CommitChoiceRecord(CommitRecord):
-    problem_type = models.CharField(choices=PROBLEM_TYPE, default='2', max_length=2)
-    correct = models.BooleanField(default=False)
-    answer = models.CharField(default='', max_length=20)
 
 
 class CompileSrcRecord(models.Model):
@@ -84,3 +60,4 @@ class CommitMissionRecord(models.Model):
     account = models.CharField(max_length=50, default='')
     mission_id = models.IntegerField(default=0)
     saved_path = models.CharField(max_length=256, default='')
+    grade = models.CharField(max_length=20, default='None')

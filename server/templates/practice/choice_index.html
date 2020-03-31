@@ -50,7 +50,7 @@
             </div>
             {% endif %}
             {% endfor %}
-            {% if request.session.identity == '1' %}
+            {% if request.session.identity == '2' %}
             <button id="btn_commit" class="btn btn-primary btn-sm" onclick="commit()" disabled>提交</button>
             {% endif %}
         </div>
@@ -90,9 +90,11 @@
             success: function (data) {
                 if (data.correct) {
                     $("#correctAlert").removeClass('hide').addClass('in');
+                    $("#wrongAlert").removeClass("in").addClass('hide');
                 }
                 else {
                     $("#wrongAlert").removeClass("hide").addClass('in');
+                    $("#correctAlert").removeClass('in').addClass('hide');
                 }
             }
         });

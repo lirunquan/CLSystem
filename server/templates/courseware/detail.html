@@ -31,9 +31,8 @@
                     &nbsp;
                     <select class="form-control" name="file_type" required onchange="change_accept(this.options[this.options.selectedIndex].value)" disabled>
                         <option value="0">请选择</option>
-                        <option value="1">PPT</option>
-                        <option value="2">Video</option>
-                        <option value="3">PDF</option>
+                        <option value="1">Video</option>
+                        <option value="2">PDF</option>
                     </select>
                     &nbsp;
                     <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="right" title="改变文件类型后需要上传对应的文件"></span>
@@ -58,18 +57,17 @@
     function change_accept(value) {
         if (value == '0') {
             $("#cw").attr("disabled", true);
+            $("button").attr("disabled", true);
         }
         if (value == '1') {
-            $("#cw").attr("accept", ".ppt,.pptx");
-        }
-        if (value == '2') {
             $("#cw").attr("accept", ".mp4");
         }
-        if (value == '3') {
+        if (value == '2') {
             $("#cw").attr("accept", ".pdf");
         }
         if (value != '0') {
             $("#cw").attr("disabled", false);
+            $("button").attr("disabled", false);
         }
     }
     function set_change() {

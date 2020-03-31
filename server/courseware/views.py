@@ -23,7 +23,6 @@ def index(request):
     if request.GET.get("ord"):
         num = int(request.GET.get("ord"))
     courseware_to_show = Courseware.objects.filter(ordinal=num)
-    stuffix = os.path.splitext(courseware_to_show[0].file_path)[-1]
     if len(courseware_to_show) != 1:
         return HttpResponse(status=404)
     return render(
@@ -32,13 +31,7 @@ def index(request):
         {
             "courseware_list": courseware_list,
             "len": len(courseware_list),
-            "show_ordinal": courseware_to_show[0].ordinal,
-            "show_title": courseware_to_show[0].title,
-            "show_path": courseware_to_show[0].show_path.replace(RESOURCES_DIR, '/resources'),
-            "file_path": courseware_to_show[0].file_path.replace(RESOURCES_DIR, '/resources'),
-            "show_id": courseware_to_show[0].id,
-            "type": courseware_to_show[0].file_type,
-            "stuffix": stuffix
+            "show_cw": courseware_to_show[0]
         }
     )
 
@@ -64,9 +57,7 @@ def create(request):
             str(ordinal) + stuffix
         )
         write_file(couseware_file, courseware_path)
-        show_path = courseware_path
-        if courseware_type == '1':
-            show_path = handle_ppt(courseware_path, saved_dir)
+        show_path = courseware_path.replace(RESOURCES_DIR, '/resources')
         cw = Courseware(
             title=title,
             ordinal=ordinal,
@@ -102,21 +93,20 @@ def modify(request, c_id):
             print("get file")
             courseware_file = request.FILES["cw_file"]
             make_dir(os.path.dirname(cw[0].file_path))
+            stuffix = os.path.splitext(courseware_file.name)[-1]
+            ordinal = cw[0].ordinal
             saved_path = os.path.join(
                 RESOURCES_DIR,
                 'courseware',
                 str(cw[0].ordinal),
-                courseware_file.name
+                str(ordinal) + stuffix
             )
             write_file(courseware_file, saved_path)
-            if f_type == '1':
-                s_path = handle_ppt(saved_path, os.path.dirname(saved_path))
-            else:
-                s_path = saved_path
             c_path = saved_path
+            s_path = c_path.replace(RESOURCES_DIR, '/resources')
         ret = cw.update(
             title=request.POST.get("title"),
-            file_type=request.POST.get("file_type"),
+            file_type=f_type,
             file_path=c_path,
             show_path=s_path
         )
@@ -141,20 +131,6 @@ def test(request):
         request,
         'video_test.html'
     )
-
-
-def file_iterator(file_name, chunk_size=8192, offset=0, length=None):
-    with open(file_name, 'rb') as f:
-        f.seek(offset, os.SEEK_SET)
-        remain = length
-        while True:
-            len_bytes = chunk_size if remain is None else min(remain, chunk_size)
-            file_data = f.read(len_bytes)
-            if not file_data:
-                break
-            if remain:
-                remain -= len(file_data)
-            yield file_data
 
 
 @require_http_methods(['GET'])

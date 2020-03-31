@@ -56,7 +56,7 @@ class JudgerUtil:
         self.compile_record_obj = None
 
     def compile_c_src(self, c_src_file, exe_file):
-        cmd = "gcc {0} -o {1}".format(c_src_file, exe_file)
+        cmd = "gcc {0} -O2 -fmax-errors=3 -o {1}".format(c_src_file, exe_file)
         compiling = Popen(
             cmd,
             shell=True,

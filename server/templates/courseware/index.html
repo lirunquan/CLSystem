@@ -27,33 +27,34 @@
     </div>
 </div>
 {% else %}
-<div id="catalogue" class="col-md-2">
-    <ul class="nav nav-pills nav-stacked">
+<div id="catalogue" class="col-md-2" style="height: 650px;overflow-y: auto;">
+    <!-- <ul class="nav nav-pills nav-stacked"> -->
+    <ul class="list-group">
         {% for cw in courseware_list %}
-        {% if cw.ordinal == show_ordinal %}
-        <li class="active"><a href="/courseware/index?ord={{ cw.ordinal }}">{{ cw.ordinal }}.{{ cw.title }}</a></li>
+        {% if cw.ordinal == show_cw.ordinal %}
+        <li><a class="list-group-item active" href="/courseware/index?ord={{ cw.ordinal }}">{{ cw.ordinal }}.{{ cw.title }}</a></li>
         {% else %}
-        <li><a href="/courseware/index?ord={{ cw.ordinal }}">{{ cw.ordinal }}.{{ cw.title }}</a></li>
+        <li class="list-group-item"><a href="/courseware/index?ord={{ cw.ordinal }}">{{ cw.ordinal }}.{{ cw.title }}</a></li>
         {% endif %}
         {% endfor %}
         {% if request.session.identity == '1' %}
-        <li><a href="/courseware/create">添加课件</a></li>
+        <li class="list-group-item"><a href="/courseware/create">添加课件</a></li>
         {% endif %}
     </ul>
 </div>
-<div id="show" class="col-md-10 panel panel-default">
+<div id="show" class="panel panel-default col-md-10">
     <div class="panel-heading">
-        <label>{{ show_title }}</label>
+        <label>{{ show_cw.title }}</label>
         &nbsp;
         {% if request.session.identity == '1' %}
-        <a href="/courseware/{{ show_id }}/detail">管理</a>
+        <a href="/courseware/{{ show_cw.id }}/detail">管理</a>
         {% endif %}
-        <a href="{{ file_path }}" style="float: right;">下载原课件</a>
+        <a href="{{ show_cw.show_path }}" style="float: right;">下载原课件</a>
     </div>
     <div class="panel-body">
-        {% if type == '1' or type == '3' %}
-        <a class="media center-block" href="{{ show_path }}"></a>
-        {% elif type == '2' %}
+        {% if show_cw.file_type == '2' %}
+        <a class="media center-block" href="{{ show_cw.show_path }}"></a>
+        {% elif show_cw.file_type == '1' %}
         <div>
             <video id="mp4Player" class="center-block" width="1024" height="576" controls autoplay>
             </video>
@@ -65,13 +66,13 @@
 
 {% include "bottom.html" %}
 <script type="text/javascript">
-    {% if type == '1' or type == '3' %}
+    {% if show_cw.file_type == '2' %}
     $(function() {  
         $('a.media').media({width:1000, height:600});  
     }); 
-    {% elif type == '2' %}
+    {% elif show_cw.file_type == '1' %}
     $(function () {
-        $("#mp4Player").attr("src", "/courseware/video_stream/?path={{show_path}}");
+        $("#mp4Player").attr("src", "/courseware/video_stream/?path={{show_cw.show_path}}");
     });
     {% endif %}
     $('.dropdown-submenu > a').submenupicker();

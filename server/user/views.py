@@ -2,11 +2,10 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from django_apscheduler.jobstores import DjangoJobStore, register_events, register_job
 from django.shortcuts import render, HttpResponse, redirect
 from django.views.decorators.http import require_http_methods
-from django.http import FileResponse
-from .models import Teacher, Student
+from .models import Teacher, Student, StudentClass
 from utils.VertificationUtil import VertificationCode
 from utils.EmailUtil import EmailUtil
-from utils.FileUtil import handle_user_excel, write_file, remove_file
+from utils.FileUtil import *
 from server.settings import RESOURCES_DIR
 from record.models import *
 import json
@@ -25,8 +24,6 @@ try:
     def remove_overdue_record():
         td = datetime.date.today()
         overdue = datetime.datetime(td.year, td.month - 1, td.day, 8, 0, 0)
-        certifyrecords = EmailCertificationRecord.objects.filter(time__lt=overdue)
-        certifyrecords.delete()
         certifysentrecords = CertificationSentRecord.objects.filter(time__lt=overdue)
         certifysentrecords.delete()
         verifysent = VerifyCodeSentRecord.objects.filter(time__lt=overdue)
@@ -130,9 +127,7 @@ def active_email(request):
         identity = obj[0].identity
         user = get_user_by_account(account, identity)
         user.email = email
-        record = EmailCertificationRecord(account=account, identity=identity, email=email, success=True)
         user.save()
-        record.save()
         return redirect("/user/index")
     return HttpResponse(status=500)
 
@@ -242,6 +237,7 @@ def send_verify_code(request):
 
 @require_http_methods(['GET'])
 def import_user(request):
+    request.session['msg'] = ""
     return render(request, "user/import_user.html")
 
 
@@ -252,10 +248,12 @@ def import_user_save(request, identity):
             filename = 'teachers_' + str(time.time()).replace('.', '') + '.xls'
             saved_path = os.path.join(RESOURCES_DIR, 'user', filename)
             write_file(tec_file, saved_path)
-            tec_data = handle_user_excel(saved_path)
+            tec_data = handle_teacher_excel(saved_path)
             for t in tec_data:
                 account = str(t["account"])
                 pwd = account[len(account) - 6: len(account)]
+                if len(Teacher.objects.filter(account=account)) != 0:
+                    continue
                 teacher = Teacher(
                     account=account,
                     real_name=t["name"],
@@ -269,15 +267,27 @@ def import_user_save(request, identity):
             filename = 'students_' + str(time.time()).replace('.', '') + '.xls'
             saved_path = os.path.join(RESOURCES_DIR, 'user', filename)
             write_file(stu_file, saved_path)
-            stu_data = handle_user_excel(saved_path)
+            stu_data = handle_student_excel(saved_path)
             for s in stu_data:
                 account = str(s["account"])
                 pwd = account[len(account) - 6: len(account)]
+                if len(Student.objects.filter(account=account)) != 0:
+                    continue
+                y = s["year"]
+                m = str(s["major"])
+                n = s["number"]
+                s_class = StudentClass.objects.get_or_create(
+                    year=int(y),
+                    major=m,
+                    number=int(n),
+                    full_name=str(y) + "级" + m + str(n) + "班"
+                )
                 student = Student(
                     account=account,
                     real_name=s["name"],
                     email="",
-                    password=base64.b64encode(pwd.encode('utf-8')).decode("utf-8")
+                    password=base64.b64encode(pwd.encode('utf-8')).decode("utf-8"),
+                    class_in_id=s_class[0].id
                 )
                 student.save()
             remove_file(saved_path)
@@ -297,8 +307,25 @@ def download_teacher(request):
 
 def temp_download(filename):
     temp_path = os.path.join(RESOURCES_DIR, 'user', filename)
-    f = open(temp_path, 'rb')
-    response = FileResponse(f)
-    response["Content-Type"] = 'application/octet-stream'
-    response['Content-Disposition'] = 'attachment;filename="' + filename + '"'
-    return response
+    return download_response(temp_path)
+
+
+@require_http_methods(['POST'])
+def add_class(request):
+    cls_file = request.FILES.get("classes")
+    filename = 'classes_' + str(time.time()).replace('.', '') + '.xls'
+    saved_path = os.path.join(RESOURCES_DIR, 'user', filename)
+    write_file(cls_file, saved_path)
+    cls_data = handle_class_excel(saved_path)
+    for c in cls_data:
+        y = c["year"]
+        m = c["major"]
+        n = c["number"]
+        sc = StudentClass.objects.update_or_create(
+            year=y,
+            major=m,
+            number=n,
+            full_name=str(y) + "级" + m + str(n) + "班"
+        )
+    remove_file(saved_path)
+    return redirect('/user/index')

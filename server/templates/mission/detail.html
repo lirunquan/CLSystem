@@ -4,6 +4,9 @@
 <script src="https://cdn.bootcss.com/wangEditor/10.0.13/wangEditor.min.js"></script>
 <script src="https://cdn.bootcss.com/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
 <link href="https://cdn.bootcss.com/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+<script src="https://cdn.bootcss.com/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap-select/1.12.4/js/i18n/defaults-zh_CN.min.js"></script>
+<link href="https://cdn.bootcss.com/bootstrap-select/1.12.4/css/bootstrap-select.min.css" rel="stylesheet">
 {% endblock %}
 {% block content %}
 {% if request.session.identity == '2' %}
@@ -66,6 +69,9 @@
     </div>
 </div>
 <script type="text/javascript">
+    if ("{{ need }}" == "False") {
+        $("#btn_submit").attr("disabled", true);
+    }
     if ("{{ overtime }}" == "True") {
         $("#btn_submit").attr("disabled", true);
     }
@@ -93,6 +99,19 @@
             <br>
             <label>内容:</label>
             <div id="editor"></div>
+            <br>
+            <label>班级:</label>
+            <div>
+                <select class="selectpicker show-tick" data-live-search="true" data-size="8" title="{{ mission.to_class }}" name="to_class" id="select_class" multiple data-actions-box="true" disabled>
+                    {% for c in classes %}
+                    {% if c.full_name in mission.to_class  %}
+                    <option value="{{ c.full_name }}" selected>{{ c.full_name }}</option>
+                    {% else %}
+                    <option value="{{ c.full_name }}">{{ c.full_name }}</option>
+                    {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
             <br>
             <div class="form-inline">
                 <label>起始时间:</label>
@@ -174,6 +193,8 @@
         $("#btn_submit").attr("disabled", false);
         $("#btn_cancel").attr("disabled", false);
         $("#btn_remove").attr("disabled", false);
+        $("#select_class").prop("disabled", false);
+        $("#select_class").selectpicker('refresh');
     }
     function remove() {
         var token = $.cookie('csrftoken');
@@ -200,7 +221,8 @@
         var title = $("input[name='title']").val();
         var start = $("#start").val();
         var end = $("#end").val();
-        if ((title == '') || (editor.txt.text() == '') || (start == '') || (end == '')) {
+        var to_class = $("#select_class").find("option:selected").text();
+        if ((title == '') || (editor.txt.text() == '') || (start == '') || (end == '') || (to_class == ' ')) {
             $("#warnAlert").removeClass("hide").addClass("in");
         }
         else{
@@ -211,6 +233,7 @@
             formdata.append("content", content);
             formdata.append("start_at", start);
             formdata.append("end_at", end);
+            formdata.append("to_class", to_class);
             $.ajax({
                 type: "POST",
                 url: "/mission/{{ mission.id }}/modify",

@@ -14,6 +14,12 @@
             &nbsp;
             <label>{{ user.account }}</label>
             &nbsp;&nbsp;&nbsp;
+            {% if request.session.identity == '2' %}
+            <label>班级:</label>
+            &nbsp;
+            <label>{{ user.class_in.full_name }}</label>
+            &nbsp;
+            {% endif %}
             <label>姓名:</label>
             &nbsp;
             <label>{{ user.real_name }}</label>
@@ -30,6 +36,35 @@
             &nbsp;
             <a href="/user/email/certificate">更换</a>
         </div>
+        {% if request.session.identity == '1' %}
+        <br>
+        <button class="btn btn-default" data-toggle="modal" data-target="#addClassModal">添加班级</button>
+        <div class="modal fade" id="addClassModal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <label class="modal-title">添加班级</label>
+                    </div>
+                    <div class="modal-body">
+                        <form method="post" action="/user/add_class" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <p>说明：请下载模板并按照模板填写班级的信息</p>
+                            <p><a href="/resources/user/class.xls">下载模板</a></p>
+                            <div class="form-inline">
+                                <input type="file" name="classes" class="form-control" required>
+                                &nbsp;
+                                <button type="submit" class="btn btn-primary">上传</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+        <br>
+        <button class="btn btn-primary" onclick="window.location='/user/import'">导入用户</button>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

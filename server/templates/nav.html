@@ -10,7 +10,7 @@
             <li><a href="/practice/problems_list">练习</a></li>
             <li class="dropdown">
                 <a class="dropdown-toggle" data-toggle="dropdown">
-                    工具<b class="caret"></b>
+                    编程工具<b class="caret"></b>
                 </a>
                 <ul class="dropdown-menu">
                     <li><a href="/tool/online_run">在线编译</a></li>
@@ -26,13 +26,19 @@
             <li><a href="/comment/index">留言</a></li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
+            {% if request.session.account %}
             <li>
-                {% if request.session.account %}
                 <a href="/user/index">{{request.session.account}}</a>
-                {% else %}
-                <a href="/user/login">登录</a>
-                {% endif %}
             </li>
+            <li>
+                <a href="/user/logout">退出</a>
+            </li>
+            {% else %}
+            <li>
+                <a href="/user/login">登录</a>
+            </li>
+            {% endif %}
+            
         </ul>
     </div>
 </nav>
