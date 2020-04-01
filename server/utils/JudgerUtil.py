@@ -2,8 +2,8 @@ import _judger
 import os
 import filecmp
 from subprocess import Popen, PIPE
-from record.models import CompileSrcRecord, JudgeRecord
-from practice.models import Programme, Choice
+from apps.record.models import CompileSrcRecord, JudgeRecord
+from apps.practice.models import Programme
 
 
 RESULT_STR = [
@@ -93,29 +93,27 @@ class JudgerUtil:
         self.compile_record_obj = record
 
     def judge(self):
-        p_type = self.get_problem_type()
-        if p_type == "1":
-            src_path = self.commit_record_obj.src_saved_path
-            src_dir = os.path.dirname(src_path)
-            exe_path = src_dir + os.path.sep + "main"
-            if not self.compile_c_src(src_path, exe_path):
-                rst = {}
-                rst['result'] = "COMPILE_ERROR"
-                self.save_judge_record(rst)
-                return
-            tc_count = self.get_testcase_count()
-            tc_dir = self.get_testcase_dir()
-            rst = []
-            for i in range(tc_count):
-                in_file = os.path.join(tc_dir, '%d.in' % i)
-                out_file = os.path.join(tc_dir, '%d.out' % i)
-                simple_rst = self.run_simple(exe_path, in_file, out_file)
-                if simple_rst["error"] == 0:
-                    simple_rst['result'] = RESULT_STR[simple_rst['result']]
-                else:
-                    simple_rst["error"] = ERROR_STR[simple_rst["error"]]
-                rst.append(simple_rst)
+        src_path = self.commit_record_obj.src_saved_path
+        src_dir = os.path.dirname(src_path)
+        exe_path = src_dir + os.path.sep + "main"
+        if not self.compile_c_src(src_path, exe_path):
+            rst = {}
+            rst['result'] = "COMPILE_ERROR"
             self.save_judge_record(rst)
+            return
+        tc_count = self.get_testcase_count()
+        tc_dir = self.get_testcase_dir()
+        rst = []
+        for i in range(tc_count):
+            in_file = os.path.join(tc_dir, '%d.in' % i)
+            out_file = os.path.join(tc_dir, '%d.out' % i)
+            simple_rst = self.run_simple(exe_path, in_file, out_file)
+            if simple_rst["error"] == 0:
+                simple_rst['result'] = RESULT_STR[simple_rst['result']]
+            else:
+                simple_rst["error"] = ERROR_STR[simple_rst["error"]]
+            rst.append(simple_rst)
+        self.save_judge_record(rst)
 
     def run_simple(self, exe_path, in_path, out_path):
         work_dir = os.path.dirname(exe_path)
@@ -142,16 +140,6 @@ class JudgerUtil:
         if not filecmp.cmp(temp_out, out_path):
             rst["result"] = -1
         return rst
-
-    def get_problem_type(self):
-        return self.commit_record_obj.problem_type
-
-    def get_choice(self):
-        p_id = self.commit_record_obj.problem_id
-        choice = Choice.objects.filter(id=p_id)
-        if len(choice) == 1:
-            return choice[0]
-        return None
 
     def get_programme(self):
         p_id = self.commit_record_obj.problem_id
@@ -183,14 +171,6 @@ class JudgerUtil:
         if programme:
             return programme.testcase_dir
         return ""
-
-    def get_choice_answer(self):
-        return self.commit_record_obj.answer
-
-    def get_reference(self):
-        choice = self.get_choice()
-        if choice:
-            return choice.reference
 
     def save_judge_record(self, rst):
         record = JudgeRecord(

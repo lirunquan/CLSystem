@@ -1,6 +1,6 @@
 from django.core.mail import send_mail, send_mass_mail
-from record.models import CertificationSentRecord, EmailSentRecord, VerifyCodeSentRecord
-from notice.models import Notice
+from apps.record.models import CertificationSentRecord, EmailSentRecord, VerifyCodeSentRecord
+from apps.notice.models import Notice
 from django.template import loader
 from server.settings import DEFAULT_FROM_EMAIL, SERVER_HOST
 from utils.manager import Manager

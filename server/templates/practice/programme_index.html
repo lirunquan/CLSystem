@@ -35,7 +35,7 @@
                 <label>输入示例:</label>
                 <div class="panel panel-default">
                     <div class="panel-body">
-                        <p>{{ programme.input_demo }}</p>
+                        <textarea readonly rows="4" class="form-control">{{ programme.input_demo }}</textarea>
                     </div>
                 </div>
                 {% endif %}
@@ -43,7 +43,7 @@
                 <label>输出示例:</label>
                 <div class="panel panel-default">
                     <div class="panel-body">
-                        <p>{{ programme.output_demo }}</p>
+                        <textarea readonly rows="4" class="form-control">{{ programme.output_demo }}</textarea>
                     </div>
                 </div>
                 {% endif %}
@@ -51,7 +51,7 @@
         </div>
     </div>
     <div id="answer" class="col-md-6">
-        <pre id="editor" style="height: 576px"></pre>
+        <pre id="editor" style="height: 600px"></pre>
         <div class="form-inline">
             {% if not request.session.identity %}
             <button class="btn btn-disabled" disabled="disabled">提交</button>

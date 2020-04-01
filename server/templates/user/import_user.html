@@ -29,9 +29,7 @@
                         批量导入学生
                     </button>
                     <br>
-                    {% if request.session.identity == '1' %}
-                    <a href="/user/index">返回</a>
-                    {% endif %}
+                    <a href="javascript:history.back(-1)">返回</a>
                 </div>
                 <div class="modal fade" id="teacherModal" tabindex="-1" role="dialog" arial-labelledby="t_label" arial-hidden="true">
                     <div class="modal-dialog">

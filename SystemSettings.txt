@@ -1,5 +1,0 @@
-Ubuntu-16.04 Python3.7 gcc5.4
-
-sudo apt install build-essential cmake
-sudo apt install libseccomp2 libseccomp-dev
-sudo apt install python3-pip

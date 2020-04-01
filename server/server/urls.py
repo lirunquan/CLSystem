@@ -18,17 +18,17 @@ from django.urls import path, include
 from django.conf.urls import url
 from django.views.static import serve
 from .settings import MEDIA_ROOT
-import notice
+import apps.notice
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('user/', include('user.urls')),
-    path('practice/', include('practice.urls')),
-    path('courseware/', include('courseware.urls')),
-    path('mission/', include('mission.urls')),
-    path('notice/', include('notice.urls')),
-    path('comment/', include('comment.urls')),
-    path('tool/', include('tool.urls')),
+    path('user/', include('apps.user.urls')),
+    path('practice/', include('apps.practice.urls')),
+    path('courseware/', include('apps.courseware.urls')),
+    path('mission/', include('apps.mission.urls')),
+    path('notice/', include('apps.notice.urls')),
+    path('comment/', include('apps.comment.urls')),
+    path('tool/', include('apps.tool.urls')),
     url(r'^resources/(?P<path>.*)$', serve, {"document_root": MEDIA_ROOT}),
-    url(r'^$', notice.views.index),
+    url(r'^$', apps.notice.views.index),
 ]
