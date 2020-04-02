@@ -8,6 +8,7 @@ from .models import Courseware
 import os
 import mimetypes
 import re
+import time
 # Create your views here.
 
 
@@ -89,17 +90,17 @@ def modify(request, c_id):
         s_path = cw[0].show_path
         if request.POST.get("file_type"):
             f_type = request.POST.get("file_type")
-        if request.FILES["cw_file"]:
-            print("get file")
+        if request.FILES.get("cw_file"):
             courseware_file = request.FILES["cw_file"]
             make_dir(os.path.dirname(cw[0].file_path))
             stuffix = os.path.splitext(courseware_file.name)[-1]
+            tick = time.strftime("%y%m%d%H%M%S", time.localtime())
             ordinal = cw[0].ordinal
             saved_path = os.path.join(
                 RESOURCES_DIR,
                 'courseware',
                 str(cw[0].ordinal),
-                str(ordinal) + stuffix
+                str(ordinal) + tick + stuffix
             )
             write_file(courseware_file, saved_path)
             c_path = saved_path
@@ -126,15 +127,8 @@ def detail(request, c_id):
     return HttpResponse(status=404)
 
 
-def test(request):
-    return render(
-        request,
-        'video_test.html'
-    )
-
-
 @require_http_methods(['GET'])
-def video_stream(request):
+def stream(request):
     http_range = request.META.get("HTTP_RANGE", '').strip()
     range_re = re.compile(r"bytes\s*=\s*(\d+)\s*-\s*(\d*)", re.I)
     range_match = range_re.match(http_range)
@@ -177,3 +171,9 @@ def video_stream(request):
         resp['Content-Length'] = str(file_size)
     resp['Accept-Ranges'] = "bytes"
     return resp
+
+
+@require_http_methods(['GET'])
+def download(request):
+    path = request.GET.get("path")
+    return download_response(path)
