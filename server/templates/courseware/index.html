@@ -49,7 +49,7 @@
         {% if request.session.identity == '1' %}
         <a href="/courseware/{{ show_cw.id }}/detail">管理</a>
         {% endif %}
-        <a href="{{ show_cw.show_path }}" style="float: right;">下载原课件</a>
+        <a href="/courseware/download?path={{ show_cw.file_path }}" style="float: right;">下载课件</a>
     </div>
     <div class="panel-body">
         {% if show_cw.file_type == '2' %}
@@ -72,7 +72,7 @@
     }); 
     {% elif show_cw.file_type == '1' %}
     $(function () {
-        $("#mp4Player").attr("src", "/courseware/video_stream/?path={{show_cw.show_path}}");
+        $("#mp4Player").attr("src", "/courseware/stream/?path={{show_cw.show_path}}");
     });
     {% endif %}
     $('.dropdown-submenu > a').submenupicker();

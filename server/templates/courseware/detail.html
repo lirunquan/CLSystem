@@ -3,6 +3,7 @@
 {% block content %}
 <div id="failAlert" class="alert alert-danger hide">
 </div>
+<a href="javascript:history.back(-1)">返回</a>
 <div class="panel panel-default">
     <div class="panel-heading">
         <button type="button" class="btn btn-default" onclick="set_change()">修改</button>
@@ -54,6 +55,7 @@
 <script type="text/javascript">
     var f_type = '{{ courseware.file_type }}';
     $("select").find("option[value='" + f_type + "']").attr("selected", true);
+    change_accept(f_type);
     function change_accept(value) {
         if (value == '0') {
             $("#cw").attr("disabled", true);

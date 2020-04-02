@@ -2,6 +2,9 @@
 
 {% block content %}
 {% if request.session.identity == '1' %}
+<label>创建编程题</label>
+&nbsp;
+<a href="javascript:history.back(-1)">返回</a>
 <form action="/practice/programme/create" method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     <div class="panel panel-default">

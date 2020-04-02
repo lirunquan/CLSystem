@@ -9,6 +9,7 @@
 <link href="https://cdn.bootcss.com/bootstrap-select/1.12.4/css/bootstrap-select.min.css" rel="stylesheet">
 {% endblock %}
 {% block content %}
+<a href="javascript:history.back(-1)">返回</a>
 {% if request.session.identity == '2' %}
 {% if committed %}
 <div id="successAlert" class="alert alert-success">
@@ -18,15 +19,13 @@
     <strong>已提交!</strong>
 </div>
 {% endif %}
-{% if overtime %}
-<div id="failedAlert" class="alert alert-danger">
+<div id="failedAlert" class="alert alert-danger in">
     <button type="button" class="close" onclick="$('#failedAlert').removeClass('in').addClass('hide')" 
         aria-hidden="true">
         &times;
     </button>
-    <strong>已超时!</strong>
+    <strong>当前不能提交!</strong>
 </div>
-{% endif %}
 <div class="panel panel-default">
     <div class="panel-heading">
         <label>{{ mission.title }}</label>
@@ -42,7 +41,7 @@
                 <div id="content"></div>
             </div>
         </div>
-        <button id="btn_submit" type="button" class="btn btn-primary" data-toggle="modal" data-target="#submit_modal">提交</button>
+        <button id="btn_submit" type="button" class="btn btn-primary" data-toggle="modal" data-target="#submit_modal" disabled>提交</button>
         <div class="modal fade" id="submit_modal" tabindex="-1" role="dialog" arial-labelledby="t_label" arial-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -69,12 +68,10 @@
     </div>
 </div>
 <script type="text/javascript">
-    if ("{{ need }}" == "False") {
-        $("#btn_submit").attr("disabled", true);
-    }
-    if ("{{ overtime }}" == "True") {
-        $("#btn_submit").attr("disabled", true);
-    }
+    {% if need and can_commit %}
+    $("#failedAlert").removeClass("in").addClass("hide");
+    $("#btn_submit").attr("disabled", false);
+    {% endif %}
     function htmlDecode(text) {
         var temp = document.createElement("div");
         temp.innerHTML = text;
