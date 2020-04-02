@@ -157,7 +157,10 @@ def forgot_password(request):
             account = request.GET.get("account")
             identity = request.GET.get("identity")
             code = request.GET.get("code")
-            obj = VerifyCodeSentRecord.objects.filter(account=account, identity=identity, code=code)
+            obj = VerifyCodeSentRecord.objects.filter(
+                account=account, identity=identity, code=code,
+                time__gt=datetime.datetime.now() - datetime.timedelta(minutes=10)
+            )
             if len(obj) != 0:
                 if code == obj.reverse()[0].code:
                     request.session['account'] = account

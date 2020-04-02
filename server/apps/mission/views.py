@@ -32,7 +32,7 @@ def detail(request, m_id):
     commit_record = CommitMissionRecord.objects.filter(mission_id=m_id, account=account)
     need_commit = False
     has_committed = False
-    overtime = False
+    can_commit = False
     if len(commit_record) > 0:
         has_committed = True
     if len(mission) == 1:
@@ -41,15 +41,20 @@ def detail(request, m_id):
         if stu:
             if stu.class_in.full_name in mission[0].to_class:
                 need_commit = True
-        now = datetime.datetime.now().replace(tzinfo=pytz.timezone('UTC'))
-        if now > mission[0].end_at:
-            overtime = True
+        now = datetime.datetime.now()
+        if now > mission[0].start_at:
+            if now < mission[0].end_at:
+                can_commit = True
+        print(now)
+        print(mission[0].start_at)
+        print(mission[0].end_at)
+        print(can_commit)
         return render(
             request,
             'mission/detail.html',
             {"mission": mission[0],
              "committed": has_committed,
-             "overtime": overtime,
+             "can_commit": can_commit,
              "need": need_commit,
              "classes": StudentClass.objects.all()}
         )
