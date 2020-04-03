@@ -17,6 +17,20 @@ scheduler = BackgroundScheduler()
 scheduler.add_jobstore(DjangoJobStore(), "default")
 
 
+def add_job(func, trigger='date', job_args=[], job_id='job', rundate=datetime.datetime.now()):
+    try:
+        scheduler.add_job(
+            func,
+            trigger,
+            args=job_args,
+            id=job_id,
+            run_date=rundate
+        )
+    except Exception as e:
+        print(e)
+        scheduler.shutdown()
+
+
 def index(request):
     notice_list = Notice.objects.order_by("-update_at").all()
     page = int(request.GET.get('page')) if request.GET.get('page') else 1
@@ -110,27 +124,16 @@ def create(request):
         )
         notice.save()
         if email_alert:
-            try:
-                ac = request.session.get("account")
-                iden = request.session.get("identity")
-                n_id = notice.id
-                scheduler.add_job(
-                    alert,
-                    "date",
-                    args=[ac, iden, n_id],
-                    id=str(n_id) + '_alert',
-                    run_date=datetime.datetime(
-                        announce_at.year,
-                        announce_at.month,
-                        announce_at.day,
-                        announce_at.hour,
-                        announce_at.minute,
-                        announce_at.second
-                    )
-                )
-            except Exception as e:
-                print(e)
-                scheduler.shutdown()
+            ac = request.session.get("account")
+            iden = request.session.get("identity")
+            n_id = notice.id
+            add_job(
+                alert,
+                "date",
+                job_args=[ac, iden, n_id],
+                job_id=str(n_id) + '_alert',
+                rundate=announce_at
+            )
         return JsonResponse({"msg": "done"})
     return HttpResponse(status=500)
 
@@ -199,37 +202,19 @@ def modify(request, n_id):
             if job:
                 if job.next_run_time != announce_at:
                     job.modify(
-                        run_date=datetime.datetime(
-                            announce_at.year,
-                            announce_at.month,
-                            announce_at.day,
-                            announce_at.hour,
-                            announce_at.minute,
-                            announce_at.second
-                        )
+                        run_date=announce_at
                     )
             else:
-                try:
-                    ac = request.session.get("account")
-                    iden = request.session.get("identity")
-                    n_id = ntc[0].id
-                    scheduler.add_job(
-                        alert,
-                        "date",
-                        args=[ac, iden, n_id],
-                        id=str(n_id) + '_alert',
-                        run_date=datetime.datetime(
-                            announce_at.year,
-                            announce_at.month,
-                            announce_at.day,
-                            announce_at.hour,
-                            announce_at.minute,
-                            announce_at.second
-                        )
-                    )
-                except Exception as e:
-                    print(e)
-                    scheduler.shutdown()
+                ac = request.session.get("account")
+                iden = request.session.get("identity")
+                n_id = ntc[0].id
+                add_job(
+                    alert,
+                    "date",
+                    job_args=[ac, iden, n_id],
+                    job_id=str(n_id) + '_alert',
+                    rundate=announce_at
+                )
         else:
             if job:
                 scheduler.remove_job(str(n_id) + "_alert")
@@ -272,9 +257,3 @@ def get_page(obj_list, page):
 
 register_events(scheduler)
 scheduler.start()
-print(
-    type(
-        scheduler.get_job(job_id='2_alert')
-    )
-)
-scheduler.print_jobs()

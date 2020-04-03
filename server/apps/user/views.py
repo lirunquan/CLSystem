@@ -1,6 +1,7 @@
 from apscheduler.schedulers.background import BackgroundScheduler
 from django_apscheduler.jobstores import DjangoJobStore, register_events, register_job
 from django.shortcuts import render, HttpResponse, redirect
+from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from .models import Teacher, Student, StudentClass
 from utils.VertificationUtil import VertificationCode
@@ -69,7 +70,7 @@ def login(request):
             if user[0].password == u_password:
                 user[0].save()
                 request.session['account'] = user[0].account
-                request.session['identity'] = user[0].identity
+                request.session['identity'] = u_identity
                 return redirect('/user/index')
             msg = 'wrong password'
             return render(request, 'user/login.html', {'message': msg})
@@ -120,7 +121,10 @@ def certificate_email(request):
 def active_email(request):
     active_code = request.GET.get("code")
     token = request.GET.get("token")
-    obj = CertificationSentRecord.objects.filter(active_code=active_code, token=token)
+    obj = CertificationSentRecord.objects.filter(
+        active_code=active_code, token=token,
+        time__gt=datetime.datetime.now() - datetime.timedelta(minutes=10)
+    )
     if len(obj) == 1:
         email = str(obj[0].recipients).split(';')[0]
         account = obj[0].account
@@ -158,20 +162,24 @@ def forgot_password(request):
             identity = request.GET.get("identity")
             code = request.GET.get("code")
             obj = VerifyCodeSentRecord.objects.filter(
-                account=account, identity=identity, code=code,
-                time__gt=datetime.datetime.now() - datetime.timedelta(minutes=10)
+                account=account, identity=identity, code=code
             )
             if len(obj) != 0:
+                print('got record')
                 if code == obj.reverse()[0].code:
-                    request.session['account'] = account
-                    request.session['identity'] = identity
-                    return render(request, 'user/forgotPassword.html', {"step": 2})
-                return HttpResponse(status=500)
-            return HttpResponse(status=500)
+                    print(obj.reverse()[0].code)
+                    return render(
+                        request,
+                        'user/forgotPassword.html',
+                        {"step": 2, "account": account, "identity": identity}
+                    )
+            return render(request, 'user/forgotPassword.html', {"step": 1, "error": "wrong"})
         return render(request, 'user/forgotPassword.html', {"step": 1})
     if request.method == 'POST':
+        account = request.POST.get("account")
+        identity = request.POST.get("identity")
         pwd = request.POST.get("reset_password")
-        user = get_user_from_request(request)
+        user = get_user_by_account(account, identity)
         if not user:
             return HttpResponse(status=500)
         user.password = pwd
@@ -252,18 +260,7 @@ def import_user_save(request, identity):
             saved_path = os.path.join(RESOURCES_DIR, 'user', filename)
             write_file(tec_file, saved_path)
             tec_data = handle_teacher_excel(saved_path)
-            for t in tec_data:
-                account = str(t["account"])
-                pwd = account[len(account) - 6: len(account)]
-                if len(Teacher.objects.filter(account=account)) != 0:
-                    continue
-                teacher = Teacher(
-                    account=account,
-                    real_name=t["name"],
-                    email="",
-                    password=base64.b64encode(pwd.encode('utf-8')).decode("utf-8")
-                )
-                teacher.save()
+            save_teachers(tec_data)
             remove_file(saved_path)
         if identity == 2:
             stu_file = request.FILES.get("student_excel")
@@ -271,31 +268,50 @@ def import_user_save(request, identity):
             saved_path = os.path.join(RESOURCES_DIR, 'user', filename)
             write_file(stu_file, saved_path)
             stu_data = handle_student_excel(saved_path)
-            for s in stu_data:
-                account = str(s["account"])
-                pwd = account[len(account) - 6: len(account)]
-                if len(Student.objects.filter(account=account)) != 0:
-                    continue
-                y = s["year"]
-                m = str(s["major"])
-                n = s["number"]
-                s_class = StudentClass.objects.get_or_create(
-                    year=int(y),
-                    major=m,
-                    number=int(n),
-                    full_name=str(y) + "级" + m + str(n) + "班"
-                )
-                student = Student(
-                    account=account,
-                    real_name=s["name"],
-                    email="",
-                    password=base64.b64encode(pwd.encode('utf-8')).decode("utf-8"),
-                    class_in_id=s_class[0].id
-                )
-                student.save()
+            save_students(stu_data)
             remove_file(saved_path)
         request.session['msg'] = "import successfully."
         return redirect("/user/import")
+
+
+def save_teachers(teachers):
+    for t in teachers:
+        account = str(t["account"])
+        pwd = account[len(account) - 6: len(account)]
+        if len(Teacher.objects.filter(account=account)) != 0:
+            continue
+        teacher = Teacher(
+            account=account,
+            real_name=t["name"],
+            email="",
+            password=base64.b64encode(pwd.encode('utf-8')).decode("utf-8")
+        )
+        teacher.save()
+
+
+def save_students(students):
+    for s in students:
+        account = str(s["account"])
+        pwd = account[len(account) - 6: len(account)]
+        if len(Student.objects.filter(account=account)) != 0:
+            continue
+        y = s["year"]
+        m = str(s["major"])
+        n = s["number"]
+        s_class = StudentClass.objects.get_or_create(
+            year=int(y),
+            major=m,
+            number=int(n),
+            full_name=str(y) + "级" + m + str(n) + "班"
+        )
+        student = Student(
+            account=account,
+            real_name=s["name"],
+            email="",
+            password=base64.b64encode(pwd.encode('utf-8')).decode("utf-8"),
+            class_in_id=s_class[0].id
+        )
+        student.save()
 
 
 @require_http_methods(['GET'])

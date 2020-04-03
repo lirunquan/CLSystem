@@ -28,7 +28,6 @@ class Problem(models.Model):
 
 
 class Programme(Problem):
-    problem_type = models.CharField(choices=PROBLEM_TYPE, default='1', max_length=2, editable=False)
     input_desc = models.TextField(default='', blank=True)
     output_desc = models.TextField(default='', blank=True)
     input_demo = models.TextField(default='', blank=True)
@@ -40,7 +39,6 @@ class Programme(Problem):
 
 
 class Choice(Problem):
-    problem_type = models.CharField(choices=PROBLEM_TYPE, default='2', max_length=2, editable=False)
     multichoice = models.BooleanField(default=False)
     options = JSONField(default=choice_options)
     reference = models.CharField(default='', max_length=10)

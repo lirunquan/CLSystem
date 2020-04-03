@@ -174,7 +174,6 @@ def programme_commit(request, p_id):
         problem_id=p_id,
         commit_times=times,
         account=str(account),
-        identity='2',
         src_content=code,
         src_saved_path=c_src
     )

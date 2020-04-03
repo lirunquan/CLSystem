@@ -1,13 +1,18 @@
 from django.db import models
 from django_mysql.models import JSONField
-from apps.user.models import USER_IDENTITY
 # Create your models here.
+
+
+USER_IDENTITY = (
+    ('1', 'Teacher'),
+    ('2', 'Student')
+)
 
 
 class Record(models.Model):
     account = models.CharField(max_length=50, default='')
-    identity = models.CharField(choices=USER_IDENTITY, default='2', max_length=2)
     time = models.DateTimeField(auto_now_add=True)
+    identity = models.CharField(choices=USER_IDENTITY, default='2', max_length=2)
     success = models.BooleanField(default=True)
     ext = models.TextField(default='', blank=True)
 

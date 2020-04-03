@@ -5,11 +5,7 @@
     <div class="panel-body">
         <div class="form-inline">
             <label>
-                {% if user.identity == '1' %}
-                工号:
-                {% elif user.identity == '2' %}
-                学号:
-                {% endif %}
+                帐号:
             </label>
             &nbsp;
             <label>{{ user.account }}</label>
