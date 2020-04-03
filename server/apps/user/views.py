@@ -113,10 +113,7 @@ def certificate_email(request):
 def active_email(request):
     active_code = request.GET.get("code")
     token = request.GET.get("token")
-    obj = CertificationSentRecord.objects.filter(
-        active_code=active_code, token=token,
-        time__gt=datetime.datetime.now() - datetime.timedelta(minutes=10)
-    )
+    obj = CertificationSentRecord.objects.filter(active_code=active_code, token=token)
     if len(obj) == 1:
         email = str(obj[0].recipients).split(';')[0]
         account = obj[0].account
