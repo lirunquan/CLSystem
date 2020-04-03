@@ -248,6 +248,8 @@ def send_verify_code(request):
 
 @require_http_methods(['GET'])
 def import_user(request):
+    if request.session.get("identity") == '2':
+        return HttpResponse(status=404)
     request.session['msg'] = ""
     return render(request, "user/import_user.html")
 
