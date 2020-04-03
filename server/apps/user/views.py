@@ -250,7 +250,6 @@ def send_verify_code(request):
 def import_user(request):
     if request.session.get("identity") == '2':
         return HttpResponse(status=404)
-    request.session['msg'] = ""
     return render(request, "user/import_user.html")
 
 
@@ -272,8 +271,7 @@ def import_user_save(request, identity):
             stu_data = handle_student_excel(saved_path)
             save_students(stu_data)
             remove_file(saved_path)
-        request.session['msg'] = "import successfully."
-        return redirect("/user/import")
+        return render(request, "user/import_user.html", {"success": True})
 
 
 def save_teachers(teachers):
