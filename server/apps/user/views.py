@@ -60,24 +60,16 @@ def login(request):
         if u_code.upper() != request.session.get('verify_code').upper():
             msg = 'wrong verification code'
             return render(request, 'user/login.html', {'message': msg})
-        if u_identity == '1':
-            user = Teacher.objects.filter(account=u_account)
-        elif u_identity == '2':
-            user = Student.objects.filter(account=u_account)
-        else:
-            return HttpResponse(status=500)
-        if len(user) == 1:
-            if user[0].password == u_password:
-                user[0].save()
-                request.session['account'] = user[0].account
-                request.session['identity'] = u_identity
-                return redirect('/user/index')
-            msg = 'wrong password'
-            return render(request, 'user/login.html', {'message': msg})
-        if len(user) == 0:
+        user = get_user_by_account(u_account, u_identity)
+        if not user:
             msg = '\'{}\' does not exist'.format(u_account)
             return render(request, 'user/login.html', {'message': msg})
-        return HttpResponse(status=500)
+        if user.password == u_password:
+            request.session['account'] = user.account
+            request.session['identity'] = u_identity
+            return redirect('/user/index')
+        msg = 'wrong password'
+        return render(request, 'user/login.html', {'message': msg})
     return HttpResponse(status=405)
 
 
