@@ -253,25 +253,25 @@ def import_user(request):
     return render(request, "user/import_user.html")
 
 
+@require_http_methods(['POST'])
 def import_user_save(request, identity):
-    if request.method == 'POST':
-        if identity == 1:
-            tec_file = request.FILES.get("teacher_excel")
-            filename = 'teachers_' + str(time.time()).replace('.', '') + '.xls'
-            saved_path = os.path.join(RESOURCES_DIR, 'user', filename)
-            write_file(tec_file, saved_path)
-            tec_data = handle_teacher_excel(saved_path)
-            save_teachers(tec_data)
-            remove_file(saved_path)
-        if identity == 2:
-            stu_file = request.FILES.get("student_excel")
-            filename = 'students_' + str(time.time()).replace('.', '') + '.xls'
-            saved_path = os.path.join(RESOURCES_DIR, 'user', filename)
-            write_file(stu_file, saved_path)
-            stu_data = handle_student_excel(saved_path)
-            save_students(stu_data)
-            remove_file(saved_path)
-        return render(request, "user/import_user.html", {"success": True})
+    if identity == 1:
+        tec_file = request.FILES.get("teacher_excel")
+        filename = 'teachers_' + str(time.time()).replace('.', '') + '.xls'
+        saved_path = os.path.join(RESOURCES_DIR, 'user', filename)
+        write_file(tec_file, saved_path)
+        tec_data = handle_teacher_excel(saved_path)
+        save_teachers(tec_data)
+        remove_file(saved_path)
+    if identity == 2:
+        stu_file = request.FILES.get("student_excel")
+        filename = 'students_' + str(time.time()).replace('.', '') + '.xls'
+        saved_path = os.path.join(RESOURCES_DIR, 'user', filename)
+        write_file(stu_file, saved_path)
+        stu_data = handle_student_excel(saved_path)
+        save_students(stu_data)
+        remove_file(saved_path)
+    return render(request, "user/import_user.html", {"success": True})
 
 
 def save_teachers(teachers):
