@@ -8,10 +8,10 @@
 </head>
 <body>
     <hr>
-    {% if request.session.msg %}
+    {% if success %}
     <div id="msgAlert" class="alert alert-info">
         <button class="close" data-dismiss="alert">&times;</button>
-        <strong>{{ request.session.msg }}</strong>
+        <strong>导入成功</strong>
     </div>
     {% endif %}
     <div class="row">
