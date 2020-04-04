@@ -72,10 +72,8 @@ def alert(account, identity, n_id):
 
 
 def create(request):
-    new_id = 1
     n_all = Notice.objects.all()
-    if len(n_all) > 0:
-        new_id = n_all[len(n_all) - 1].pk + 1
+    new_id = n_all[len(n_all) - 1].pk + 1 if len(n_all) > 0 else 1
     if request.method == 'GET':
         make_dir(os.path.join(RESOURCES_DIR, 'notice', str(new_id)))
         return render(
@@ -126,12 +124,11 @@ def create(request):
         if email_alert:
             ac = request.session.get("account")
             iden = request.session.get("identity")
-            n_id = notice.id
             add_job(
                 alert,
                 "date",
-                job_args=[ac, iden, n_id],
-                job_id=str(n_id) + '_alert',
+                job_args=[ac, iden, notice.id],
+                job_id=str(notice.id) + '_alert',
                 rundate=announce_at
             )
         return JsonResponse({"msg": "done"})
@@ -154,15 +151,15 @@ def modify(request, n_id):
             )
             ntc[0].appendix.delete()
             ntc.delete()
-            job = scheduler.get_job(job_id=str(n_id) + '_alert')
+            job = scheduler.get_job(job_id=str(ntc[0].id) + '_alert')
             if job:
-                scheduler.remove_job(str(n_id) + "_alert")
+                scheduler.remove_job(str(ntc[0].id) + "_alert")
             return JsonResponse({"msg": "done"})
         with_appendix = ntc[0].with_appendix
         appendix = ntc[0].appendix
         if request.POST.get("operation") == "clear_appendix":
             make_dir(
-                os.path.join(RESOURCES_DIR, "notice", str(n_id))
+                os.path.join(RESOURCES_DIR, "notice", str(ntc[0].id))
             )
             appendix.file_list.clear()
             with_appendix = False
@@ -182,7 +179,7 @@ def modify(request, n_id):
                 saved_path = os.path.join(
                     RESOURCES_DIR,
                     'notice',
-                    str(n_id),
+                    str(ntc[0].id),
                     file.name
                 )
                 stuffix = os.path.splitext(file.name)[1]
@@ -197,7 +194,7 @@ def modify(request, n_id):
             request.POST.get("announce_at"),
             "%Y-%m-%d %H:%M:%S"
         )
-        job = scheduler.get_job(job_id=str(n_id) + '_alert')
+        job = scheduler.get_job(job_id=str(ntc[0].id) + '_alert')
         if email_alert:
             if job:
                 if job.next_run_time != announce_at:
@@ -207,17 +204,16 @@ def modify(request, n_id):
             else:
                 ac = request.session.get("account")
                 iden = request.session.get("identity")
-                n_id = ntc[0].id
                 add_job(
                     alert,
                     "date",
-                    job_args=[ac, iden, n_id],
-                    job_id=str(n_id) + '_alert',
+                    job_args=[ac, iden, ntc[0].id],
+                    job_id=str(ntc[0].id) + '_alert',
                     rundate=announce_at
                 )
         else:
             if job:
-                scheduler.remove_job(str(n_id) + "_alert")
+                scheduler.remove_job(str(ntc[0].id) + "_alert")
         ret = ntc.update(
             title=title,
             content=content,

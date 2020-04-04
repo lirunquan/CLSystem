@@ -9,7 +9,6 @@ from apps.user.models import StudentClass
 from apps.user.views import get_user_by_account
 from apps.record.models import CommitMissionRecord
 import datetime
-import pytz
 # Create your views here.
 
 
@@ -30,8 +29,7 @@ def detail(request, m_id):
     mission = Mission.objects.filter(id=m_id)
     account = request.session.get("account")
     commit_record = CommitMissionRecord.objects.filter(mission_id=m_id, account=account)
-    need_commit = False
-    has_committed = False
+    need_commit, has_committed, can_commit = False, False, False
     can_commit = False
     if len(commit_record) > 0:
         has_committed = True
@@ -45,10 +43,6 @@ def detail(request, m_id):
         if now > mission[0].start_at:
             if now < mission[0].end_at:
                 can_commit = True
-        print(now)
-        print(mission[0].start_at)
-        print(mission[0].end_at)
-        print(can_commit)
         return render(
             request,
             'mission/detail.html',

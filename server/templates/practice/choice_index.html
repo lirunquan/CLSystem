@@ -202,39 +202,48 @@
         var token = $.cookie('csrftoken');
         var json = {};
         var options = [];
-        json["operation"] = "change";
-        json["title"] = $("input[name='title']").val();
-        json["detail"] = $("textarea[name='detail']").val();
-        for (var i = 0; i < options_count; i++) {
-            s = String.fromCharCode(i + 65);
-            options.push({"sign": s, "content": $("input[name="+s+"]").val()})
-        }
-        json["options"] = options;
-        json["multichoice"] = document.getElementsByName('multi')[0].checked;
-        json["reference"] = $("input[name='reference']").val().toUpperCase();
-        $.ajax({
-            type: "POST",
-            url: "/practice/choice/{{ choice.id }}/modify",
-            headers:{'X-CSRFToken': token},
-            contentType: "application/json",
-            dataType: "json",
-            data: JSON.stringify(json),
-            success: function(data){
-                if (data.msg == 'done') {
-                    $("successAlert").append("<p>修改成功</p>");
-                    $("successAlert").removeClass("hide").addClass("in");
-                    window.location.reload();
-                }
-                else if (data.msg == 'empty') {
-                    $("failAlert").append("<p>请将信息填写完整</p>");
-                    $("failAlert").removeClass("hide").addClass("in");
-                }
-                else {
-                    $("failAlert").append("<p>修改失败</p>");
-                    $("failAlert").removeClass("hide").addClass("in");
-                }
+        var ready = true;
+        var input =$('table :input[type="text"]');
+        for(var i=0;i<input.length;i++){
+            if(input[i].value==''){
+                ready = false;
             }
-        });
+        }
+        if (ready) {
+            json["operation"] = "change";
+            json["title"] = $("input[name='title']").val();
+            json["detail"] = $("textarea[name='detail']").val();
+            for (var i = 0; i < options_count; i++) {
+                s = String.fromCharCode(i + 65);
+                options.push({"sign": s, "content": $("input[name="+s+"]").val()})
+            }
+            json["options"] = options;
+            json["multichoice"] = document.getElementsByName('multi')[0].checked;
+            json["reference"] = $("input[name='reference']").val().toUpperCase();
+            $.ajax({
+                type: "POST",
+                url: "/practice/choice/{{ choice.id }}/modify",
+                headers:{'X-CSRFToken': token},
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify(json),
+                success: function(data){
+                    if (data.msg == 'done') {
+                        $("successAlert").append("<p>修改成功</p>");
+                        $("successAlert").removeClass("hide").addClass("in");
+                        window.location.reload();
+                    }
+                    else {
+                        $("failAlert").append("<p>修改失败</p>");
+                        $("failAlert").removeClass("hide").addClass("in");
+                    }
+                }
+            });
+        }
+        else {
+            $("failAlert").append("<p>请将信息填写完整</p>");
+            $("failAlert").removeClass("hide").addClass("in");
+        }
     }
     function remove() {
         var token = $.cookie('csrftoken');

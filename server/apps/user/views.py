@@ -1,7 +1,6 @@
 from apscheduler.schedulers.background import BackgroundScheduler
 from django_apscheduler.jobstores import DjangoJobStore, register_events, register_job
 from django.shortcuts import render, HttpResponse, redirect
-from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from .models import Teacher, Student, StudentClass
 from utils.VertificationUtil import VertificationCode
@@ -94,7 +93,7 @@ def certificate_email(request):
         if is_login == 0:
             return redirect("/user/login")
         return render(request, 'user/certificateEmail.html', {})
-    elif request.method == 'POST':
+    if request.method == 'POST':
         email = request.POST.get('email')
         recipients = [email]
         account = request.session.get('account')

@@ -50,6 +50,7 @@ def add_programme(request):
         tc_dir = os.path.join(RESOURCES_DIR, 'programme', 'testcase', str(p_id))
         save_tc_file(testcase_file, tc_dir)
         p = Programme(
+            id=p_id,
             title=title,
             detail=detail,
             input_desc=input_desc,
@@ -73,15 +74,6 @@ def add_choice(request):
 @require_http_methods(['POST'])
 def add_choice_single(request):
     data_dic = json.loads(request.body)
-    if data_dic["title"] == "":
-        return JsonResponse({"msg": "failed"})
-    if data_dic["detail"] == "":
-        return JsonResponse({"msg": "failed"})
-    for o in data_dic["options"]:
-        if o["content"] == "":
-            return JsonResponse({"msg": "failed"})
-    if data_dic["reference"] == "":
-        return JsonResponse({"msg": "failed"})
     c = Choice(
         title=data_dic["title"],
         detail=data_dic["detail"],
@@ -302,8 +294,8 @@ def programme_modify(request, p_id):
     programme = Programme.objects.filter(id=p_id)
     if request.POST.get("operation") == "remove":
         if len(programme) == 1:
-            make_dir(programme.testcase_dir)
-            os.rmdir(programme.testcase_dir)
+            make_dir(programme[0].testcase_dir)
+            os.rmdir(programme[0].testcase_dir)
             programme.delete()
             return JsonResponse({"msg": "done"})
     file = request.FILES.get("testcase_zip")

@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
-{% if message %}
-<div class="alert alert-warning">
-    <strong>{{ message }}</strong>
+<div id="warnAlert" class="alert alert-warning hide">
+    <button type="button" class="close" onclick="$('#warnAlert').removeClass('in').addClass('hide')" aria-hidden="true">
+        &times;
+    </button>
 </div>
-{% endif %}
 <form id="login_form" class="col-md-6" action="/user/login" method="post" onsubmit="return encode_pwd()">
     {% csrf_token %}
     <div class="panel panel-primary">
@@ -49,6 +49,17 @@
     </div>
 </form>
 <script>
+    {% if message %}
+    {% if message == 'wrong verification code' %}
+    var msg = "<strong>验证码错误</strong>";
+    {% elif message == 'wrong password' %}
+    var msg = "<strong>密码错误</strong>";
+    {% else %}
+    var msg = "<strong>用户不存在</strong>";
+    {% endif %}
+    $("#warnAlert").append(msg);
+    $("#warnAlert").removeClass("hide").addClass("in");
+    {% endif %}
     function refresh_code(obj) {
         obj.src += "?"+Math.random()
     }

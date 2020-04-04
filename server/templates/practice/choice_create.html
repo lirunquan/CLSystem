@@ -3,6 +3,10 @@
 {% block content %}
 {% if request.session.identity == '1' %}
     <div id="dangerAlert" class="alert alert-danger hide">
+        <button type="button" class="close" onclick="$('#dangerAlert').removeClass('in').addClass('hide')" 
+                    aria-hidden="true">
+                    &times;
+                </button>
         <p>请将信息填写完整</p>
     </div>
     <label>创建选择题</label>
@@ -113,31 +117,41 @@
         var token = $.cookie('csrftoken');
         var json = {};
         var options = [];
-        json["title"] = $("input[name='title']").val();
-        json["detail"] = $("textarea[name='detail']").val();
-        for (var i = 0; i < options_count; i++) {
-            s = String.fromCharCode(i + 65);
-            options.push({"sign": s, "content": $("input[name="+s+"]").val()})
-        }
-        json["options"] = options;
-        json["multichoice"] = document.getElementsByName('multi')[0].checked;
-        json["reference"] = $("input[name='reference']").val().toUpperCase();
-        $.ajax({
-            type: "POST",
-            url: "/practice/choice/create/single",
-            headers:{'X-CSRFToken': token},
-            contentType: "application/json",
-            dataType: "json",
-            data: JSON.stringify(json),
-            success: function(data){
-                if (data.msg == 'done') {
-                    window.location = '/practice/problems_list';
-                }
-                else {
-                    $("#dangerAlert").removeClass("hide").addClass("in");
-                }
+        var ready = true;
+        var input =$('table :input[type="text"]');
+        for(var i=0;i<input.length;i++){
+            if(input[i].value==''){
+                ready = false;
             }
-        });
+        }
+        if (ready) {
+            json["title"] = $("input[name='title']").val();
+            json["detail"] = $("textarea[name='detail']").val();
+            for (var i = 0; i < options_count; i++) {
+                s = String.fromCharCode(i + 65);
+                options.push({"sign": s, "content": $("input[name="+s+"]").val()});
+            }
+            json["options"] = options;
+            json["multichoice"] = document.getElementsByName('multi')[0].checked;
+            json["reference"] = $("input[name='reference']").val().toUpperCase();
+            $.ajax({
+                type: "POST",
+                url: "/practice/choice/create/single",
+                headers:{'X-CSRFToken': token},
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify(json),
+                success: function(data){
+                    if (data.msg == 'done') {
+                        window.location = '/practice/problems_list';
+                    }
+                    
+                }
+            });
+        }
+        else {
+            $("#dangerAlert").removeClass("hide").addClass("in");
+        }
     }
 </script>
 {% elif request.session.identity == '2' %}

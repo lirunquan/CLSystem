@@ -42,9 +42,17 @@
             </div>
             <br>
             <div id="warnAlert" class="alert alert-warning hide">
+                <button type="button" class="close" onclick="$('#warnAlert').removeClass('in').addClass('hide')" 
+                    aria-hidden="true">
+                    &times;
+                </button>
                 <strong>请将内容填写完整</strong>
             </div>
             <div id="failedAlert" class="alert alert-danger hide">
+                <button type="button" class="close" onclick="$('#failedAlert').removeClass('in').addClass('hide')" 
+                    aria-hidden="true">
+                    &times;
+                </button>
                 <strong>操作失败!</strong>
             </div>
             <button type="button" class="btn btn-primary" onclick="submit()">提交</button>
