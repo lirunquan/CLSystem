@@ -250,7 +250,6 @@ def check_commit(request):
             d for d in data_list if d["result"] == request.GET.get("result")
         ]
     data = get_data(new_list, page)
-    print(data.object_list)
     return render(
         request,
         'practice/check_commit.html',

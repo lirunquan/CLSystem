@@ -116,14 +116,14 @@ def commit(request, m_id):
         if len(commited_record) > 0:
             ret = commited_record.update(saved_path=saved_path)
             if ret == 1:
-                return redirect('/mission/check/' + str(m_id))
+                return redirect('/mission/' + str(m_id) + '/detail')
         record = CommitMissionRecord(
             account=account,
             mission_id=m_id,
             saved_path=saved_path
         )
         record.save()
-        return redirect('/mission/check/' + str(m_id))
+        return redirect('/mission/' + str(m_id) + '/detail')
     return HttpResponse(status=404)
 
 
@@ -159,7 +159,8 @@ def modify(request, m_id):
             content=content,
             start_at=start_at,
             end_at=end_at,
-            to_class=to_class
+            to_class=to_class,
+            update_at=datetime.datetime.now()
         )
         if ret == 1:
             return JsonResponse({"msg": "done"})

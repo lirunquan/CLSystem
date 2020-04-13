@@ -220,7 +220,8 @@ def modify(request, n_id):
             announce_at=announce_at,
             email_alert=email_alert,
             with_appendix=with_appendix,
-            appendix=appendix
+            appendix=appendix,
+            update_at=datetime.datetime.now()
         )
         if ret == 1:
             return JsonResponse({"msg": "done"})
