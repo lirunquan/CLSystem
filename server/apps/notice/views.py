@@ -149,11 +149,11 @@ def modify(request, n_id):
                     str(ntc[0].id)
                 )
             )
-            ntc[0].appendix.delete()
-            ntc.delete()
             job = scheduler.get_job(job_id=str(ntc[0].id) + '_alert')
             if job:
                 scheduler.remove_job(str(ntc[0].id) + "_alert")
+            ntc[0].appendix.delete()
+            ntc.delete()
             return JsonResponse({"msg": "done"})
         with_appendix = ntc[0].with_appendix
         appendix = ntc[0].appendix
