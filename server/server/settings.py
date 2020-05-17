@@ -155,3 +155,5 @@ SERVER_HOST = "http://192.168.2.112:10086"
 
 MEDIA_URL = '/resources/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'resources')
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
